@@ -14,7 +14,7 @@ export default function NewNodePage() {
 	const [input, setInput] = useState<string[]>([]);
 	const [output, setOutput] = useState<string[]>([]);
 
-	const [node, setNode] = useState<any>({ id: '0', type: 'flowNode', position: { x: 30, y: 30 }, data: { name: "", input: [], output: [] } });
+	const [node, setNode] = useState<any>({ id: '0', type: 'flowNode', position: { x: 30, y: 30 }, data: { name: "", input: [], output: [], status: "idle" } });
 
 	return (
 		<FrameView title="Nodes" subtitle="Create new node">

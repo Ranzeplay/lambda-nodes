@@ -17,10 +17,10 @@ export default function NewPipelinePage() {
 	const [route, setRoute] = useState("");
 
 	const [nodes, setNodes, onNodesChange] = useNodesState([
-		{ id: '1', type: 'flowNode', position: { x: 0, y: 0 }, data: { name: "Begin", input: [], output: ["out1"] } },
-		{ id: '-1', type: 'flowNode', position: { x: 20, y: 20 }, data: { name: "End", input: ["in"], output: [] } },
-		{ id: '10', type: 'flowNode', position: { x: 40, y: 40 }, data: { name: "Intermediate 1", input: ["in1"], output: ["out1"] } },
-		{ id: '20', type: 'flowNode', position: { x: 60, y: 60 }, data: { name: "Intermediate 2", input: ["in1", "in2"], output: ["out1"] } },
+		{ id: '1', type: 'flowNode', position: { x: 0, y: 0 }, data: { name: "Begin", input: [], output: ["out1"] }, status: "idle" },
+		{ id: '-1', type: 'flowNode', position: { x: 20, y: 20 }, data: { name: "End", input: ["in"], output: [] }, status: "fail" },
+		{ id: '10', type: 'flowNode', position: { x: 40, y: 40 }, data: { name: "Intermediate 1", input: ["in1"], output: ["out1"], status: "running" } },
+		{ id: '20', type: 'flowNode', position: { x: 60, y: 60 }, data: { name: "Intermediate 2", input: ["in1", "in2"], output: ["out1"], status: "success" } },
 	]);
 	const [edges, setEdges, onEdgesChange] = useEdgesState([]);
 
@@ -34,7 +34,7 @@ export default function NewPipelinePage() {
 			<div className="flex flex-col space-y-4">
 				<div className="space-y-1.5">
 					<h2 className="font-bold text-xl">Name</h2>
-					<Input type="text" className="border-gray-500" value={name} onChange={(n) => setName(n.target.value)} />
+					<Input type="text" value={name} onChange={(n) => setName(n.target.value)} />
 				</div>
 
 				<div className="space-y-1.5">
