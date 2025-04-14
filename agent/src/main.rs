@@ -1,50 +1,45 @@
 mod routes;
+mod db;
 
-use deno_core::error::AnyError;
-use std::rc::Rc;
-use actix_web::{App, HttpServer};
-use crate::routes::ping::ping;
-
-async fn run_js(file_path: &str) -> Result<(), AnyError> {
-    let main_module = deno_core::resolve_path(file_path, &std::env::current_dir()?)?;
-    let mut js_runtime = deno_core::JsRuntime::new(deno_core::RuntimeOptions {
-        module_loader: Some(Rc::new(deno_core::FsModuleLoader)),
-        ..Default::default()
-    });
-
-    let internal_mod_id = js_runtime
-        .load_side_es_module_from_code(
-            &deno_core::ModuleSpecifier::parse("runjs:runtime.js")?,
-            include_str!("../runtime.js"),
-        )
-        .await?;
-    let internal_mod_result = js_runtime.mod_evaluate(internal_mod_id);
-
-    let mod_id = js_runtime.load_main_es_module(&main_module).await?;
-    let result = js_runtime.mod_evaluate(mod_id);
-    js_runtime.run_event_loop(Default::default()).await?;
-    internal_mod_result.await?;
-    result.await.map_err(AnyError::from)
-}
+use actix_web::{web, App, HttpServer};
+use tokio_postgres::{NoTls, Config};
+use dotenvy::dotenv;
+use std::env;
+use std::sync::Arc;
 
 #[tokio::main]
-#[actix_web::main]
 async fn main() -> anyhow::Result<()> {
-    let runtime = tokio::runtime::Builder::new_current_thread()
-        .enable_all()
-        .build()
-        .unwrap();
-    if let Err(error) = runtime.block_on(run_js("./example.js")) {
-        eprintln!("error: {}", error);
-    }
+    // Load environment variables
+    dotenv().ok();
 
-    HttpServer::new(|| {
+    // Database connection setup
+    let mut cfg = Config::new();
+    cfg.host(&env::var("DB_HOST").unwrap_or_else(|_| "localhost".to_string()))
+        .port(env::var("DB_PORT").unwrap_or_else(|_| "5432".to_string()).parse()?)
+        .dbname(&env::var("DB_NAME").unwrap_or_else(|_| "lambda_nodes".to_string()))
+        .user(&env::var("DB_USER").unwrap_or_else(|_| "postgres".to_string()))
+        .password(&env::var("DB_PASSWORD").unwrap_or_else(|_| "postgres".to_string()));
+
+    let (client, connection) = cfg.connect(NoTls).await?;
+    
+    // Spawn the connection handler
+    tokio::spawn(async move {
+        if let Err(e) = connection.await {
+            eprintln!("database connection error: {}", e);
+        }
+    });
+
+    let client = Arc::new(client);
+
+    // Start HTTP server
+    HttpServer::new(move || {
         App::new()
-            .service(ping)
+            .app_data(web::Data::new(client.clone()))
+            .configure(routes::configure)
     })
-        .bind(("127.0.0.1", 8080))?
-        .run()
-        .await?;
+    .bind(("127.0.0.1", 8080))?
+    .run()
+    .await?;
 
     Ok(())
 }

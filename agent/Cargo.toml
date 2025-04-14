@@ -18,3 +18,4 @@ anyhow = "~1.0"
 chrono = { version = "~0.4", features = ["serde"] }
 memory-cache-rs = "~0.2"
 actix-web = "~4.10"
+uuid = { version = "~1.16", features = ["v4"] }
