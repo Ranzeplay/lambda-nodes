@@ -1,16 +1,23 @@
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@radix-ui/react-select";
-import { Background, Controls, ReactFlow } from "@xyflow/react";
+import { Background, Controls, ReactFlow, useEdgesState, useNodesState } from "@xyflow/react";
 import { Plus } from "lucide-react";
 import { useState } from "react";
 import FrameView from "~/components/frame";
-import ReactFlowWrapper from "~/components/reactflowWrapper";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "~/components/ui/select";
+
+import '@xyflow/react/dist/style.css';
+import FlowNode from "~/components/node";
+
+const nodeTypes = { flowNode: FlowNode };
 
 export default function NewPipelinePage() {
 	const [name, setName] = useState("");
 	const [method, setMethod] = useState("GET");
 	const [route, setRoute] = useState("");
+
+	const [nodes, setNodes, onNodesChange] = useNodesState([]);
+	const [edges, setEdges, onEdgesChange] = useEdgesState([]);
 
 	return (
 		<FrameView title="Pipelines" subtitle="Create new pipeline">
@@ -23,10 +30,10 @@ export default function NewPipelinePage() {
 				<div className="space-y-1.5">
 					<h2 className="font-bold text-xl">Graph</h2>
 					<div className="h-[80vh] w-full border border-gray-300 grow">
-						<ReactFlow>
+						<ReactFlow nodeTypes={nodeTypes} nodes={nodes} edges={edges} onNodesChange={onNodesChange} onEdgesChange={onEdgesChange} fitView>
 							<Background />
 							<Controls />
-						<Button className="absolute top-2 right-2 z-50 cursor-pointer"><Plus /> Add node</Button>
+							<Button className="absolute top-2 right-2 z-50 cursor-pointer"><Plus /> Add node</Button>
 						</ReactFlow>
 					</div>
 				</div>
@@ -34,15 +41,24 @@ export default function NewPipelinePage() {
 				<div className="space-y-1.5">
 					<h2 className="font-bold text-xl">HTTP Route</h2>
 					<div className="flex flex-row space-x-4">
-						<select title="Method" className="w-[100px] border border-gray-300 rounded-md p-2" value={method} onChange={(n) => setMethod(n.target.value)}>
-							<option value="GET">GET</option>
-							<option value="POST">POST</option>
-							<option value="PUT">PUT</option>
-							<option value="DELETE">DELETE</option>
-						</select>
-						<div className="flex flex-row space-x-1 items-center">
+						<Select>
+							<SelectTrigger className="w-[210px]">
+								<SelectValue placeholder="Select a HTTP method" />
+							</SelectTrigger>
+							<SelectContent>
+								<SelectGroup>
+									<SelectLabel>HTTP Methods</SelectLabel>
+									<SelectItem value="GET">GET</SelectItem>
+									<SelectItem value="POST">POST</SelectItem>
+									<SelectItem value="PUT">PUT</SelectItem>
+									<SelectItem value="DELETE">DELETE</SelectItem>
+									<SelectItem value="PATCH">PATCH</SelectItem>
+								</SelectGroup>
+							</SelectContent>
+						</Select>
+						<div className="flex flex-row space-x-1 items-center grow">
 							<p className="font-mono">/pipeline/</p>
-							<Input type="text" className="font-mono" value={route} onChange={(n) => setRoute(n.target.value)} />
+							<Input type="text" className="font-mono grow" value={route} onChange={(n) => setRoute(n.target.value)} />
 						</div>
 					</div>
 				</div>

@@ -13,8 +13,8 @@ const items = [
 		icon: Code,
 	},
 	{
-		title: "Jobs",
-		url: "/jobs",
+		title: "Pipelines",
+		url: "/pipelines",
 		icon: CirclePlay,
 	},
 	{

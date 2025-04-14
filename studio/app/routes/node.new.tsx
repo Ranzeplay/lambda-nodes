@@ -36,7 +36,7 @@ export default function NewNodePage() {
 					<h2 className="font-bold text-xl">Configuration</h2>
 					<div className="flex flex-row space-x-4">
 						<div className="h-[56vh] border border-gray-300 grow">
-							<ReactFlowWrapper nodes={[node]} nodeTypes={nodeTypes} />
+							<ReactFlowWrapper nodes={[node]} nodeTypes={nodeTypes} fitView />
 						</div>
 						<div className="flex flex-col space-y-2 grow">
 							<div className="flex flex-col space-y-1.5">
