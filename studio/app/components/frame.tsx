@@ -1,30 +1,30 @@
-import { Home, Inbox, Calendar, Search, Settings, LayoutDashboard, Code, PenBox, Logs } from "lucide-react";
-import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger } from "./ui/sidebar";
+import { Settings, LayoutDashboard, Code, Logs, CirclePlay } from "lucide-react";
+import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider } from "./ui/sidebar";
 
 const items = [
 	{
 		title: "Dashboard",
-		url: "#",
+		url: "/",
 		icon: LayoutDashboard,
 	},
 	{
 		title: "Library",
-		url: "#",
+		url: "/library",
 		icon: Code,
 	},
 	{
-		title: "Editor",
-		url: "#",
-		icon: PenBox,
+		title: "Jobs",
+		url: "/jobs",
+		icon: CirclePlay,
 	},
 	{
 		title: "Logs",
-		url: "#",
+		url: "/logs",
 		icon: Logs,
 	},
 	{
 		title: "Settings",
-		url: "#",
+		url: "/settings",
 		icon: Settings,
 	},
 ]
