@@ -1,7 +1,7 @@
-import type { Route } from "./+types/home";
-import { Welcome } from "../welcome/welcome";
+import FrameView from "~/components/frame";
+import type { Route } from "../+types/root";
 
-export function meta({}: Route.MetaArgs) {
+export function meta({ }: Route.MetaArgs) {
   return [
     { title: "New React Router App" },
     { name: "description", content: "Welcome to React Router!" },
@@ -9,5 +9,9 @@ export function meta({}: Route.MetaArgs) {
 }
 
 export default function Home() {
-  return <Welcome />;
+  return (
+    <FrameView title="Home" subtitle="Welcome to the home page">
+      <h1>Hello</h1>
+    </FrameView>
+  );
 }
