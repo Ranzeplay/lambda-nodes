@@ -2,6 +2,7 @@ import { Binoculars, Check, LoaderCircle, Pencil, Plus, Rocket } from "lucide-re
 import { Link } from "react-router";
 import FrameView from "~/components/frame";
 import { Button } from "~/components/ui/button";
+import { Input } from "~/components/ui/input";
 import { TableHeader, TableRow, TableHead, TableBody, TableCell, Table } from "~/components/ui/table";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/components/ui/tooltip";
 
@@ -9,9 +10,10 @@ export default function PipelinesPage() {
 	return (
 		<FrameView title="Pipelines" subtitle="Manage pipelines">
 			<div className="flex flex-col space-y-4">
-				<div className="flex flex-row-reverse">
+				<div className="flex flex-row space-x-4">
+					<Input type="text" placeholder="Search..." className="grow" />
 					<Button>
-						<Link to="/pipeline/new" className="flex items-center gap-x-2 m-0 p-0">
+						<Link to="/node/new" className="flex items-center gap-x-2 m-0 p-0">
 							<Plus /> New
 						</Link>
 					</Button>

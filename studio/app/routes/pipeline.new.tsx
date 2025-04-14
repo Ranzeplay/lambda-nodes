@@ -27,7 +27,7 @@ export default function NewPipelinePage() {
 	const onConnect = useCallback(
 		(connection) => setEdges((eds) => addEdge(connection, eds)),
 		[setEdges],
-	  );
+	);
 
 	return (
 		<FrameView title="Pipelines" subtitle="Create new pipeline">
