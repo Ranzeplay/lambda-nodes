@@ -13,7 +13,7 @@ export default function PipelinesPage() {
 				<div className="flex flex-row space-x-4">
 					<Input type="text" placeholder="Search..." className="grow" />
 					<Button>
-						<Link to="/node/new" className="flex items-center gap-x-2 m-0 p-0">
+						<Link to="/pipeline/new" className="flex items-center gap-x-2 m-0 p-0">
 							<Plus /> New
 						</Link>
 					</Button>
