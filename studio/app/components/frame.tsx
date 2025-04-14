@@ -35,7 +35,7 @@ export default function FrameView({ children, title, subtitle }: { children: Rea
 			<Sidebar className="bg-gray-50 border-r border-gray-200 shadow p-3">
 				<SidebarContent>
 					<SidebarGroup className="space-y-4">
-						<SidebarGroupLabel className="text-xl font-bold font-serif">Lambda Nodes</SidebarGroupLabel>
+						<h2 className="text-xl font-bold font-serif">Lambda Nodes</h2>
 						<SidebarGroupContent>
 							<SidebarMenu className="space-y-1">
 								{items.map((item) => (

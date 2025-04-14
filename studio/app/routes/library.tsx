@@ -7,7 +7,7 @@ export default function LibraryPage() {
 	return (
 		<FrameView title="Library" subtitle="All scripts">
 			<div className="flex flex-row-reverse">
-				<Button className="bg-black text-white shadow">
+				<Button>
 					<Link to="/node/new" className="flex items-center gap-x-2 m-0 p-0">
 					<Plus /> New
 					</Link>

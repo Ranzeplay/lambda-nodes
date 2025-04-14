@@ -1,8 +1,6 @@
 import FrameView from "~/components/frame";
 import { Input } from "~/components/ui/input";
 import { Button } from "~/components/ui/button";
-
-import '@xyflow/react/dist/style.css';
 import FlowNode from "~/components/node";
 import ReactFlowWrapper from "~/components/reactflowWrapper";
 import MonacoEditorWrapper from "~/components/monacoEditorWrapper";
@@ -16,14 +14,14 @@ export default function NewNodePage() {
 	const [input, setInput] = useState<string[]>([]);
 	const [output, setOutput] = useState<string[]>([]);
 
-	const [node, setNode] = useState<any>({id: '0', type: 'flowNode', position: { x: 30, y: 30 }, data: {name: "", input: [], output: []}});
+	const [node, setNode] = useState<any>({ id: '0', type: 'flowNode', position: { x: 30, y: 30 }, data: { name: "", input: [], output: [] } });
 
 	return (
 		<FrameView title="Nodes" subtitle="Create new node">
 			<div className="flex flex-col space-y-4">
 				<div className="space-y-1.5">
 					<h2 className="font-bold text-xl">Name</h2>
-					<Input type="text" className="border-gray-500" value={name} onChange={(n) => {
+					<Input type="text" value={name} onChange={(n) => {
 						setName(n.target.value);
 						const newNode = { ...node };
 						newNode.data.name = n.target.value;
@@ -45,7 +43,7 @@ export default function NewNodePage() {
 								<h3 className="text-lg font-bold">Input</h3>
 								{input.map((i, index) => (
 									<div className="flex flex-row space-x-2" key={index}>
-										<Input type="text" className="border-gray-500 w-4/5" value={i} onChange={(n) => {
+										<Input type="text" className="w-4/5" value={i} onChange={(n) => {
 											const newInput = [...input];
 											newInput[index] = n.target.value;
 											setInput(newInput);
@@ -65,13 +63,13 @@ export default function NewNodePage() {
 										}}>Remove</Button>
 									</div>
 								))}
-								<Button variant={"link"} className="block w-min cursor-pointer text-blue-500" onClick={() => setInput([...input, ""])}>Add</Button>
+								<Button variant={"link"} className="block w-min cursor-pointer !text-blue-500" onClick={() => setInput([...input, ""])}>Add</Button>
 							</div>
 							<div className="flex flex-col space-y-1.5">
 								<h3 className="text-lg font-bold">Output</h3>
 								{output.map((i, index) => (
 									<div className="flex flex-row space-x-2" key={index}>
-										<Input type="text" className="border-gray-500 w-4/5" value={i} onChange={(n) => {
+										<Input type="text" className="w-4/5" value={i} onChange={(n) => {
 											const newOutput = [...output];
 											newOutput[index] = n.target.value;
 											setOutput(newOutput);
@@ -91,15 +89,15 @@ export default function NewNodePage() {
 										}}>Remove</Button>
 									</div>
 								))}
-								<Button variant={"link"} className="block w-min cursor-pointer text-blue-500" onClick={() => setOutput([...output, ""])}>Add</Button>
+								<Button variant={"link"} className="block w-min cursor-pointer !text-blue-500" onClick={() => setOutput([...output, ""])}>Add</Button>
 							</div>
 						</div>
 					</div>
 
 				</div>
 				<div className="flex flex-row space-x-4">
-					<Button className="bg-blue-600 text-white border">Submit</Button>
-					<Button className="bg-gray-600 text-white border" variant={"secondary"}>Cancel</Button>
+					<Button>Submit</Button>
+					<Button variant={"secondary"}>Cancel</Button>
 				</div>
 			</div>
 		</FrameView>
