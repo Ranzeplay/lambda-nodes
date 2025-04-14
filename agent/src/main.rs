@@ -1,5 +1,9 @@
+mod routes;
+
 use deno_core::error::AnyError;
 use std::rc::Rc;
+use actix_web::{App, HttpServer};
+use crate::routes::ping::ping;
 
 async fn run_js(file_path: &str) -> Result<(), AnyError> {
     let main_module = deno_core::resolve_path(file_path, &std::env::current_dir()?)?;
@@ -23,7 +27,9 @@ async fn run_js(file_path: &str) -> Result<(), AnyError> {
     result.await.map_err(AnyError::from)
 }
 
-fn main() {
+#[tokio::main]
+#[actix_web::main]
+async fn main() -> anyhow::Result<()> {
     let runtime = tokio::runtime::Builder::new_current_thread()
         .enable_all()
         .build()
@@ -31,4 +37,14 @@ fn main() {
     if let Err(error) = runtime.block_on(run_js("./example.js")) {
         eprintln!("error: {}", error);
     }
+
+    HttpServer::new(|| {
+        App::new()
+            .service(ping)
+    })
+        .bind(("127.0.0.1", 8080))?
+        .run()
+        .await?;
+
+    Ok(())
 }
