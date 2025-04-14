@@ -1,6 +1,6 @@
-import { Background, Controls, ReactFlow, useEdgesState, useNodesState } from "@xyflow/react";
+import { addEdge, Background, Controls, ReactFlow, useEdgesState, useNodesState } from "@xyflow/react";
 import { Plus } from "lucide-react";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import FrameView from "~/components/frame";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
@@ -16,8 +16,18 @@ export default function NewPipelinePage() {
 	const [method, setMethod] = useState("GET");
 	const [route, setRoute] = useState("");
 
-	const [nodes, setNodes, onNodesChange] = useNodesState([]);
+	const [nodes, setNodes, onNodesChange] = useNodesState([
+		{ id: '1', type: 'flowNode', position: { x: 0, y: 0 }, data: { name: "Begin", input: [], output: ["out1"] } },
+		{ id: '-1', type: 'flowNode', position: { x: 20, y: 20 }, data: { name: "End", input: ["in"], output: [] } },
+		{ id: '10', type: 'flowNode', position: { x: 40, y: 40 }, data: { name: "Intermediate 1", input: ["in1"], output: ["out1"] } },
+		{ id: '20', type: 'flowNode', position: { x: 60, y: 60 }, data: { name: "Intermediate 2", input: ["in1", "in2"], output: ["out1"] } },
+	]);
 	const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+
+	const onConnect = useCallback(
+		(connection) => setEdges((eds) => addEdge(connection, eds)),
+		[setEdges],
+	  );
 
 	return (
 		<FrameView title="Pipelines" subtitle="Create new pipeline">
@@ -30,7 +40,7 @@ export default function NewPipelinePage() {
 				<div className="space-y-1.5">
 					<h2 className="font-bold text-xl">Graph</h2>
 					<div className="h-[80vh] w-full border border-gray-300 grow">
-						<ReactFlow nodeTypes={nodeTypes} nodes={nodes} edges={edges} onNodesChange={onNodesChange} onEdgesChange={onEdgesChange} fitView>
+						<ReactFlow nodeTypes={nodeTypes} nodes={nodes} edges={edges} onNodesChange={onNodesChange} onEdgesChange={onEdgesChange} onConnect={onConnect} fitView>
 							<Background />
 							<Controls />
 							<Button className="absolute top-2 right-2 z-50 cursor-pointer"><Plus /> Add node</Button>
