@@ -12,4 +12,6 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
             .configure(nodes::configure)
             .configure(pipelines::configure)
     );
+
+    cfg.service(ping::ping);
 }

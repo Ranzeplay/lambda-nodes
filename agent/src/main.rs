@@ -6,6 +6,7 @@ use tokio_postgres::{NoTls, Config};
 use dotenvy::dotenv;
 use std::env;
 use std::sync::Arc;
+use actix_web::middleware::Logger;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -16,7 +17,7 @@ async fn main() -> anyhow::Result<()> {
     let mut cfg = Config::new();
     cfg.host(&env::var("DB_HOST").unwrap_or_else(|_| "localhost".to_string()))
         .port(env::var("DB_PORT").unwrap_or_else(|_| "5432".to_string()).parse()?)
-        .dbname(&env::var("DB_NAME").unwrap_or_else(|_| "lambda_nodes".to_string()))
+        .dbname(&env::var("DB_NAME").unwrap_or_else(|_| "lambda-nodes".to_string()))
         .user(&env::var("DB_USER").unwrap_or_else(|_| "postgres".to_string()))
         .password(&env::var("DB_PASSWORD").unwrap_or_else(|_| "postgres".to_string()));
 
@@ -34,10 +35,11 @@ async fn main() -> anyhow::Result<()> {
     // Start HTTP server
     HttpServer::new(move || {
         App::new()
+            .wrap(Logger::default())
             .app_data(web::Data::new(client.clone()))
             .configure(routes::configure)
     })
-    .bind(("127.0.0.1", 8080))?
+    .bind(("127.0.0.1", 3000))?
     .run()
     .await?;
 
