@@ -2,14 +2,19 @@ use anyhow::Result;
 use tokio_postgres::Client;
 use uuid::Uuid;
 use crate::db::models::Node;
-use crate::db::utils::{json_to_sql, row_to_node};
+use crate::db::utils::row_to_node;
 
-pub async fn create_node(client: &Client, name: &str, content: &serde_json::Value) -> Result<Node> {
-    let content_str = json_to_sql(content);
+pub async fn create_node(
+    client: &Client, 
+    name: &str, 
+    script: &str, 
+    inputs: &[String], 
+    outputs: &[String]
+) -> Result<Node> {
     let row = client
         .query_one(
-            "INSERT INTO nodes (name, content) VALUES ($1, $2) RETURNING id, name, content",
-            &[&name, &content_str],
+            "INSERT INTO nodes (name, script, inputs, outputs) VALUES ($1, $2, $3, $4) RETURNING id, is_internal, name, script, inputs, outputs",
+            &[&name, &script, &inputs, &outputs],
         )
         .await?;
     Ok(row_to_node(row))
@@ -18,7 +23,7 @@ pub async fn create_node(client: &Client, name: &str, content: &serde_json::Valu
 pub async fn get_node(client: &Client, id: Uuid) -> Result<Option<Node>> {
     let row = client
         .query_opt(
-            "SELECT id, name, content FROM nodes WHERE id = $1",
+            "SELECT id, is_internal, name, script, inputs, outputs FROM nodes WHERE id = $1",
             &[&id],
         )
         .await?;
@@ -29,13 +34,14 @@ pub async fn update_node(
     client: &Client,
     id: Uuid,
     name: &str,
-    content: &serde_json::Value,
+    script: &str,
+    inputs: &[String],
+    outputs: &[String],
 ) -> Result<Option<Node>> {
-    let content_str = json_to_sql(content);
     let row = client
         .query_opt(
-            "UPDATE nodes SET name = $2, content = $3 WHERE id = $1 RETURNING id, name, content",
-            &[&id, &name, &content_str],
+            "UPDATE nodes SET name = $2, script = $3, inputs = $4, outputs = $5 WHERE id = $1 RETURNING id, is_internal, name, script, inputs, outputs",
+            &[&id, &name, &script, &inputs, &outputs],
         )
         .await?;
     Ok(row.map(row_to_node))
@@ -51,7 +57,7 @@ pub async fn delete_node(client: &Client, id: Uuid) -> Result<bool> {
 pub async fn list_nodes(client: &Client, limit: i64, offset: i64) -> Result<Vec<Node>> {
     let rows = client
         .query(
-            "SELECT id, name, content FROM nodes ORDER BY name ASC LIMIT $1 OFFSET $2",
+            "SELECT id, is_internal, name, script, inputs, outputs FROM nodes ORDER BY name ASC LIMIT $1 OFFSET $2",
             &[&limit, &offset],
         )
         .await?;

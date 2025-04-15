@@ -7,6 +7,7 @@ use std::error::Error;
 use postgres_types::private::BytesMut;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
 pub enum LogLevel {
     Info,
     Warn,
@@ -46,6 +47,7 @@ impl<'a> FromSql<'a> for LogLevel {
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct Log {
     pub id: i32,
     pub level: LogLevel,
@@ -54,13 +56,18 @@ pub struct Log {
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct Node {
     pub id: Uuid,
+    pub is_internal: bool,
     pub name: String,
-    pub content: serde_json::Value,
+    pub script: String,
+    pub inputs: Vec<String>,
+    pub outputs: Vec<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
 pub enum HttpMethod {
     GET,
     POST,

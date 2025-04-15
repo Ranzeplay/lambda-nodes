@@ -20,3 +20,4 @@ memory-cache-rs = "~0.2"
 actix-web = "~4.10"
 uuid = { version = "~1.16", features = ["v4"] }
 env_logger = "~0.11"
+actix-cors = "~0.7"

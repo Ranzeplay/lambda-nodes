@@ -1,6 +1,7 @@
 mod db;
 mod routes;
 
+use actix_cors::Cors;
 use actix_web::middleware::Logger;
 use actix_web::{web, App, HttpServer};
 use dotenvy::dotenv;
@@ -45,6 +46,13 @@ async fn main() -> anyhow::Result<()> {
     HttpServer::new(move || {
         App::new()
             .wrap(Logger::default())
+            .wrap(
+                Cors::default()
+                    .allow_any_origin()
+                    .allow_any_method()
+                    .allow_any_header()
+                    .max_age(3600)
+            )
             .app_data(web::Data::new(client.clone()))
             .configure(routes::configure)
     })

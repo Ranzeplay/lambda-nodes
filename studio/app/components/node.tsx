@@ -1,12 +1,6 @@
 import { Handle, Position } from "@xyflow/react";
 import { FunctionSquare } from "lucide-react";
-
-export type NodeData = {
-	name: string,
-	input: string[],
-	output: string[],
-	status: 'idle' | 'running' | 'fail' | 'success' | 'default',
-};
+import type { NodeData } from "~/lib/nodeModel";
 
 function getColor(status: NodeData['status']) {
 	switch (status) {
@@ -14,7 +8,7 @@ function getColor(status: NodeData['status']) {
 			return 'bg-gray-500 text-white';
 		case 'running':
 			return 'bg-blue-500 text-white';
-		case 'fail':
+		case 'error':
 			return 'bg-red-500 text-white';
 		case 'success':
 			return 'bg-green-600 text-white';
@@ -32,9 +26,9 @@ export default function FlowNode({ data, isConnectable }: { data: NodeData, isCo
 			</div>
 
 			<div>
-				{data.input.length === 0 ? (
+				{data.inputs.length === 0 ? (
 					<h3 className="m-2 font-mono text-sm text-gray-500">No input</h3>
-				) : data.input.map((i, index) => (
+				) : data.inputs.map((i, index) => (
 					<div key={index} className="relative flex flex-row space-x-2 items-center px-2 py-1.5">
 						<span className="text-gray-700 font-mono">{i}</span>
 						<Handle
@@ -49,9 +43,9 @@ export default function FlowNode({ data, isConnectable }: { data: NodeData, isCo
 
 				<hr className="text-gray-300" />
 
-				{data.output.length === 0 ? (
+				{data.outputs.length === 0 ? (
 					<h3 className="m-2 font-mono text-sm text-gray-500">No output</h3>
-				) : data.output.map((o, index) => (
+				) : data.outputs.map((o, index) => (
 					<div key={index} className="relative flex flex-row space-x-2 items-center px-2 py-1.5">
 						<span className="text-gray-700 font-mono">{o}</span>
 						<Handle

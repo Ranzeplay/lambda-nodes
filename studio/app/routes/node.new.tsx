@@ -5,16 +5,49 @@ import FlowNode from "~/components/node";
 import ReactFlowWrapper from "~/components/reactflowWrapper";
 import MonacoEditorWrapper from "~/components/monacoEditorWrapper";
 import { useState } from "react";
+import { serverAddress } from "~/lib/env";
+import { useNavigate } from "react-router";
+import { toast } from "sonner";
+import type { NodeData } from "~/lib/nodeModel";
 
 const nodeTypes = { flowNode: FlowNode };
 
 export default function NewNodePage() {
 	const [name, setName] = useState("");
-	const [script, setScript] = useState("");
-	const [input, setInput] = useState<string[]>([]);
-	const [output, setOutput] = useState<string[]>([]);
+	const [script, setScript] = useState("export function handle(data, context) {\n\t// code here\n}\n");
+	const [inputs, setInputs] = useState<string[]>([]);
+	const [outputs, setOutputs] = useState<string[]>([]);
 
-	const [node, setNode] = useState<any>({ id: '0', type: 'flowNode', position: { x: 30, y: 30 }, data: { name: "", input: [], output: [], status: "idle" } });
+	const [node, setNode] = useState<{ id: string, type: string, position: { x: number, y: number }, data: NodeData }>
+		({
+			id: '0',
+			type: 'flowNode',
+			position: { x: 30, y: 30 },
+			data: { name: "", inputs: [], outputs: [], status: "idle" }
+		});
+
+	const navigate = useNavigate();
+	async function submit() {
+		const result = await fetch(serverAddress + "/api/nodes", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({
+				name,
+				script,
+				inputs,
+				outputs,
+			}),
+		});
+
+		if (result.ok) {
+			navigate("/library");
+			toast.success("Node created successfully!");
+		} else {
+			toast.error("Failed to create node. Please try again.");
+		}
+	}
 
 	return (
 		<FrameView title="Nodes" subtitle="Create new node">
@@ -41,62 +74,62 @@ export default function NewNodePage() {
 						<div className="flex flex-col space-y-2 grow">
 							<div className="flex flex-col space-y-1.5">
 								<h3 className="text-lg font-bold">Input</h3>
-								{input.map((i, index) => (
+								{inputs.map((i, index) => (
 									<div className="flex flex-row space-x-2" key={index}>
 										<Input type="text" className="w-4/5" value={i} onChange={(n) => {
-											const newInput = [...input];
+											const newInput = [...inputs];
 											newInput[index] = n.target.value;
-											setInput(newInput);
+											setInputs(newInput);
 
 											const newNode = { ...node };
-											newNode.data.input = newInput;
+											newNode.data.inputs = newInput;
 											setNode(newNode);
 										}} />
 										<Button variant={"link"} className="block w-min cursor-pointer text-red-500" onClick={() => {
-											const newInput = [...input];
+											const newInput = [...inputs];
 											newInput.splice(index, 1);
-											setInput(newInput);
+											setInputs(newInput);
 
 											const newNode = { ...node };
-											newNode.data.input = newInput;
+											newNode.data.inputs = newInput;
 											setNode(newNode);
 										}}>Remove</Button>
 									</div>
 								))}
-								<Button variant={"link"} className="block w-min cursor-pointer !text-blue-500" onClick={() => setInput([...input, ""])}>Add</Button>
+								<Button variant={"link"} className="block w-min cursor-pointer !text-blue-500" onClick={() => setInputs([...inputs, ""])}>Add</Button>
 							</div>
 							<div className="flex flex-col space-y-1.5">
 								<h3 className="text-lg font-bold">Output</h3>
-								{output.map((i, index) => (
+								{outputs.map((i, index) => (
 									<div className="flex flex-row space-x-2" key={index}>
 										<Input type="text" className="w-4/5" value={i} onChange={(n) => {
-											const newOutput = [...output];
+											const newOutput = [...outputs];
 											newOutput[index] = n.target.value;
-											setOutput(newOutput);
+											setOutputs(newOutput);
 
 											const newNode = { ...node };
-											newNode.data.output = newOutput;
+											newNode.data.outputs = newOutput;
 											setNode(newNode);
 										}} />
 										<Button variant={"link"} className="block w-min cursor-pointer text-red-500" onClick={() => {
-											const newOutput = [...output];
+											const newOutput = [...outputs];
 											newOutput.splice(index, 1);
-											setOutput(newOutput);
+											setOutputs(newOutput);
 
 											const newNode = { ...node };
-											newNode.data.output = newOutput;
+											newNode.data.outputs = newOutput;
 											setNode(newNode);
 										}}>Remove</Button>
 									</div>
 								))}
-								<Button variant={"link"} className="block w-min cursor-pointer !text-blue-500" onClick={() => setOutput([...output, ""])}>Add</Button>
+								<Button variant={"link"} className="block w-min cursor-pointer !text-blue-500" onClick={() => setOutputs([...outputs, ""])}>Add</Button>
 							</div>
 						</div>
 					</div>
 
 				</div>
 				<div className="flex flex-row space-x-4">
-					<Button>Submit</Button>
+					<Button onClick={submit}>Submit</Button>
 					<Button variant={"secondary"}>Cancel</Button>
 				</div>
 			</div>

@@ -24,11 +24,13 @@ pub fn row_to_log(row: Row) -> Log {
 }
 
 pub fn row_to_node(row: Row) -> Node {
-    let content_str: String = row.get(2);
     Node {
         id: row.get(0),
-        name: row.get(1),
-        content: sql_to_json(&content_str).unwrap_or(serde_json::Value::Null),
+        is_internal: row.get(1),
+        name: row.get(2),
+        script: row.get(3),
+        inputs: row.get(4),
+        outputs: row.get(5),
     }
 }
 
