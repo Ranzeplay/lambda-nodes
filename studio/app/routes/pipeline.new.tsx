@@ -1,6 +1,6 @@
 import { addEdge, Background, Controls, ReactFlow, useEdgesState, useNodesState } from "@xyflow/react";
 import { Plus } from "lucide-react";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useId, useState } from "react";
 import FrameView from "~/components/frame";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
@@ -8,6 +8,10 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrig
 
 import '@xyflow/react/dist/style.css';
 import FlowNode from "~/components/node";
+import { fetchAllNodes, type NodeIndexData } from "~/lib/nodeModel";
+import { toast } from "sonner";
+import { DrawerTrigger, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription, DrawerFooter, DrawerClose, Drawer } from "~/components/ui/drawer";
+import { v4 as uuidv4 } from 'uuid';
 
 const nodeTypes = { flowNode: FlowNode };
 
@@ -16,18 +20,48 @@ export default function NewPipelinePage() {
 	const [method, setMethod] = useState("GET");
 	const [route, setRoute] = useState("");
 
-	const [nodes, setNodes, onNodesChange] = useNodesState([
-		{ id: '1', type: 'flowNode', position: { x: 0, y: 0 }, data: { name: "Begin", input: [], output: ["out1"] }, status: "idle" },
-		{ id: '-1', type: 'flowNode', position: { x: 20, y: 20 }, data: { name: "End", input: ["in"], output: [] }, status: "fail" },
-		{ id: '10', type: 'flowNode', position: { x: 40, y: 40 }, data: { name: "Intermediate 1", input: ["in1"], output: ["out1"], status: "running" } },
-		{ id: '20', type: 'flowNode', position: { x: 60, y: 60 }, data: { name: "Intermediate 2", input: ["in1", "in2"], output: ["out1"], status: "success" } },
-	]);
+	const [nodes, setNodes, onNodesChange] = useNodesState([]);
 	const [edges, setEdges, onEdgesChange] = useEdgesState([]);
 
+	const [nodeAditionDrawerOpen, setNodeAditionDrawerOpen] = useState(false);
+
+	const [availableNodes, setAvailableNodes] = useState<NodeIndexData[]>();
+	useEffect(() => {
+		fetchAllNodes()
+			.then((nodes) => {
+				setAvailableNodes(nodes);
+			})
+			.catch((error) => {
+				toast.error("Error fetching nodes:", error);
+			});
+	}, []);
+
 	const onConnect = useCallback(
-		(connection) => setEdges((eds) => addEdge(connection, eds)),
+		// @ts-ignore
+		(connection: any) => setEdges((eds: any) => addEdge(connection, eds)),
 		[setEdges],
 	);
+
+	function addNode(nodeId: string) {
+		const node = availableNodes?.find((n) => n.id === nodeId)!;
+
+		const newNode = {
+			id: uuidv4(),
+			type: 'flowNode',
+			position: { x: 0, y: 0 },
+			data: {
+				name: node.name,
+				inputs: node.inputs,
+				outputs: node.outputs,
+				status: node.status,
+			},
+		};
+		// @ts-ignore
+		setNodes((nds) => nds.concat(newNode));
+		toast.success(`Node ${node.name} added successfully!`);
+
+		setNodeAditionDrawerOpen(false);
+	}
 
 	return (
 		<FrameView title="Pipelines" subtitle="Create new pipeline">
@@ -43,7 +77,28 @@ export default function NewPipelinePage() {
 						<ReactFlow nodeTypes={nodeTypes} nodes={nodes} edges={edges} onNodesChange={onNodesChange} onEdgesChange={onEdgesChange} onConnect={onConnect} fitView>
 							<Background />
 							<Controls />
-							<Button className="absolute top-2 right-2 z-50 cursor-pointer"><Plus /> Add node</Button>
+							<Drawer open={nodeAditionDrawerOpen} onOpenChange={setNodeAditionDrawerOpen} direction="right">
+								<DrawerTrigger>
+									<Button className="absolute top-2 right-2 z-50 cursor-pointer"><Plus /> Add node</Button>
+								</DrawerTrigger>
+								<DrawerContent>
+									<DrawerHeader>
+										<DrawerTitle>Select node</DrawerTitle>
+										<DrawerDescription>{availableNodes?.length} node(s) in total</DrawerDescription>
+									</DrawerHeader>
+									<div className="flex flex-col space-y-1 mx-3.5">
+										<Input type="text" placeholder="Search node..." className="mb-2" />
+										{availableNodes?.map((node, index) => (
+											<Button key={index} variant="link" className="block w-min text-blue-500" onClick={() => addNode(node.id)}>{node.name}</Button>
+										))}
+									</div>
+									<DrawerFooter className="flex flex-row-reverse">
+										<DrawerClose className="flex">
+											<Button variant="outline">Cancel</Button>
+										</DrawerClose>
+									</DrawerFooter>
+								</DrawerContent>
+							</Drawer>
 						</ReactFlow>
 					</div>
 				</div>

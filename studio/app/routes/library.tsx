@@ -6,33 +6,20 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/comp
 import { Binoculars, Pencil, Plus } from "lucide-react";
 import { Input } from "~/components/ui/input";
 import { useEffect, useState } from "react";
-import { serverAddress } from "~/lib/env";
 import { toast } from "sonner";
-import type { NodeData } from "~/lib/nodeModel";
-
-type NodeIndexData = NodeData & {
-	id: string;
-	isInternal: boolean;
-};
+import { fetchAllNodes, type NodeData, type NodeIndexData } from "~/lib/nodeModel";
 
 export default function LibraryPage() {
 	const [nodes, setNodes] = useState<NodeIndexData[]>([]);
 
 	useEffect(() => {
-		fetch(serverAddress + "/api/nodes")
-			.then((response) => {
-				if (!response.ok) {
-					toast.error("Network response was not ok");
-				}
-				response.json().then((data) => {
-					if (data) {
-						setNodes(data);
-					} else {
-						toast.error("No data found");
-					}
-				});
-			}).catch((error) => {
-				toast.error("There was a problem with the fetch operation: ", error);
+		fetchAllNodes()
+			.then((data) => {
+				setNodes(data!);
+			})
+			.catch((error) => {
+				toast.error("Failed to fetch nodes. Please try again.");
+				console.error("Error fetching nodes:", error);
 			});
 	}, []);
 
