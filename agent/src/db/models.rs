@@ -1,10 +1,10 @@
 use anyhow::Result;
 use chrono::{DateTime, Utc};
-use serde::{Deserialize, Serialize};
-use tokio_postgres::types::{Type, IsNull, to_sql_checked, FromSql, ToSql};
-use uuid::Uuid;
-use std::error::Error;
 use postgres_types::private::BytesMut;
+use serde::{Deserialize, Serialize};
+use std::error::Error;
+use tokio_postgres::types::{to_sql_checked, FromSql, IsNull, ToSql, Type};
+use uuid::Uuid;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
@@ -15,12 +15,17 @@ pub enum LogLevel {
 }
 
 impl<'a> ToSql for LogLevel {
-    fn to_sql(&self, ty: &Type, out: &mut BytesMut) -> Result<IsNull, Box<dyn Error + Sync + Send>> {
+    fn to_sql(
+        &self,
+        ty: &Type,
+        out: &mut BytesMut,
+    ) -> Result<IsNull, Box<dyn Error + Sync + Send>> {
         match self {
             LogLevel::Info => "info",
             LogLevel::Warn => "warn",
             LogLevel::Error => "error",
-        }.to_sql(ty, out)
+        }
+            .to_sql(ty, out)
     }
 
     fn accepts(ty: &Type) -> bool {
@@ -75,4 +80,4 @@ pub struct Pipeline {
     pub content: serde_json::Value,
     pub method: HttpMethod,
     pub url: String,
-} 
+}

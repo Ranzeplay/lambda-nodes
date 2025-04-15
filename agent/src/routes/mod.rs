@@ -1,8 +1,8 @@
+pub mod exec;
 pub mod logs;
 pub mod nodes;
-pub mod pipelines;
 pub mod ping;
-pub mod exec;
+pub mod pipelines;
 
 use actix_web::web;
 
@@ -11,7 +11,7 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
         web::scope("/api")
             .configure(logs::configure)
             .configure(nodes::configure)
-            .configure(pipelines::configure)
+            .configure(pipelines::configure),
     );
 
     cfg.service(ping::ping);

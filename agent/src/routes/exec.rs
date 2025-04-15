@@ -1,9 +1,9 @@
-use actix_web::{route, web, HttpRequest, HttpResponse, Responder};
-use std::sync::Arc;
-use serde_json::Value;
-use tokio_postgres::Client;
 use crate::db::flow::Graph;
 use crate::executor::GraphExecutor;
+use actix_web::{route, web, HttpRequest, HttpResponse, Responder};
+use serde_json::Value;
+use std::sync::Arc;
+use tokio_postgres::Client;
 
 #[route(
     "/exec/{tail:.*}",
@@ -21,10 +21,12 @@ pub async fn exec(
 ) -> impl Responder {
     let tail = path.into_inner();
 
-    let pipeline_graph_result = client.query_one(
-        "SELECT content FROM pipelines WHERE url = $1 AND method = $2 LIMIT 1",
-        &[&tail, &req.method().as_str()],
-    ).await;
+    let pipeline_graph_result = client
+        .query_one(
+            "SELECT content FROM pipelines WHERE url = $1 AND method = $2 LIMIT 1",
+            &[&tail, &req.method().as_str()],
+        )
+        .await;
 
     if let Err(e) = pipeline_graph_result {
         return HttpResponse::NotFound().body(format!("{:?}", e));
@@ -37,9 +39,9 @@ pub async fn exec(
     if let Err(_) = executor.init_entry(json.into_inner()) {
         return HttpResponse::InternalServerError().body("Failed to initialize pipeline entry");
     }
-    
+
     executor.init_node_queue();
-    
+
     while !executor.reached_end {
         if let Err(_) = executor.exec_current_queue() {
             return HttpResponse::InternalServerError().body("Failed to execute current queue");

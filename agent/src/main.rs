@@ -1,7 +1,7 @@
-mod db;
-mod routes;
-mod executor;
 pub(crate) mod blocks;
+mod db;
+mod executor;
+mod routes;
 
 use actix_cors::Cors;
 use actix_web::middleware::Logger;
@@ -53,15 +53,15 @@ async fn main() -> anyhow::Result<()> {
                     .allow_any_origin()
                     .allow_any_method()
                     .allow_any_header()
-                    .max_age(3600)
+                    .max_age(3600),
             )
             .app_data(web::Data::new(client.clone()))
             .configure(routes::configure)
     })
-    // .workers(1)
-    .bind(("127.0.0.1", 3000))?
-    .run()
-    .await?;
+        // .workers(1)
+        .bind(("127.0.0.1", 3000))?
+        .run()
+        .await?;
 
     Ok(())
 }

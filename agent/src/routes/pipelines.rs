@@ -40,17 +40,16 @@ pub async fn create_pipeline(
         &req.content,
         req.method.clone(),
         &req.url,
-    ).await {
+    )
+        .await
+    {
         Ok(pipeline) => HttpResponse::Created().json(pipeline),
         Err(e) => HttpResponse::InternalServerError().body(e.to_string()),
     }
 }
 
 #[get("/{id}")]
-pub async fn get_pipeline(
-    client: web::Data<Arc<Client>>,
-    id: web::Path<Uuid>,
-) -> impl Responder {
+pub async fn get_pipeline(client: web::Data<Arc<Client>>, id: web::Path<Uuid>) -> impl Responder {
     match crate::db::get_pipeline(&client, id.into_inner()).await {
         Ok(Some(pipeline)) => HttpResponse::Ok().json(pipeline),
         Ok(None) => HttpResponse::NotFound().finish(),
@@ -71,7 +70,9 @@ pub async fn update_pipeline(
         &req.content,
         req.method.clone(),
         &req.url,
-    ).await {
+    )
+        .await
+    {
         Ok(Some(pipeline)) => HttpResponse::Ok().json(pipeline),
         Ok(None) => HttpResponse::NotFound().finish(),
         Err(e) => HttpResponse::InternalServerError().body(e.to_string()),
@@ -105,9 +106,7 @@ pub async fn list_pipelines(
 }
 
 #[get("/count")]
-pub async fn count_pipelines(
-    client: web::Data<Arc<Client>>,
-) -> impl Responder {
+pub async fn count_pipelines(client: web::Data<Arc<Client>>) -> impl Responder {
     match crate::db::count_pipelines(&client).await {
         Ok(count) => HttpResponse::Ok().json(count),
         Err(e) => HttpResponse::InternalServerError().body(e.to_string()),
@@ -122,6 +121,6 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
             .service(list_pipelines)
             .service(get_pipeline)
             .service(update_pipeline)
-            .service(delete_pipeline)
+            .service(delete_pipeline),
     );
-} 
+}

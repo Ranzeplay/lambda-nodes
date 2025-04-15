@@ -1,8 +1,8 @@
-use actix_web::{web, HttpResponse, Responder, get, post, put, delete};
+use actix_web::{delete, get, post, put, web, HttpResponse, Responder};
 use serde::Deserialize;
+use std::sync::Arc;
 use tokio_postgres::Client;
 use uuid::Uuid;
-use std::sync::Arc;
 
 #[derive(Deserialize)]
 pub struct CreateNodeRequest {
@@ -31,23 +31,14 @@ pub async fn create_node(
     client: web::Data<Arc<Client>>,
     req: web::Json<CreateNodeRequest>,
 ) -> impl Responder {
-    match crate::db::create_node(
-        &client,
-        &req.name,
-        &req.script,
-        &req.inputs,
-        &req.outputs,
-    ).await {
+    match crate::db::create_node(&client, &req.name, &req.script, &req.inputs, &req.outputs).await {
         Ok(node) => HttpResponse::Created().json(node),
         Err(e) => HttpResponse::InternalServerError().body(e.to_string()),
     }
 }
 
 #[get("/{id}")]
-pub async fn get_node(
-    client: web::Data<Arc<Client>>,
-    id: web::Path<Uuid>,
-) -> impl Responder {
+pub async fn get_node(client: web::Data<Arc<Client>>, id: web::Path<Uuid>) -> impl Responder {
     match crate::db::get_node(&client, id.into_inner()).await {
         Ok(Some(node)) => HttpResponse::Ok().json(node),
         Ok(None) => HttpResponse::NotFound().finish(),
@@ -68,7 +59,9 @@ pub async fn update_node(
         &req.script,
         &req.inputs,
         &req.outputs,
-    ).await {
+    )
+        .await
+    {
         Ok(Some(node)) => HttpResponse::Ok().json(node),
         Ok(None) => HttpResponse::NotFound().finish(),
         Err(e) => HttpResponse::InternalServerError().body(e.to_string()),
@@ -76,10 +69,7 @@ pub async fn update_node(
 }
 
 #[delete("/{id}")]
-pub async fn delete_node(
-    client: web::Data<Arc<Client>>,
-    id: web::Path<Uuid>,
-) -> impl Responder {
+pub async fn delete_node(client: web::Data<Arc<Client>>, id: web::Path<Uuid>) -> impl Responder {
     match crate::db::delete_node(&client, id.into_inner()).await {
         Ok(true) => HttpResponse::NoContent().finish(),
         Ok(false) => HttpResponse::NotFound().finish(),
@@ -102,9 +92,7 @@ pub async fn list_nodes(
 }
 
 #[get("/count")]
-pub async fn count_nodes(
-    client: web::Data<Arc<Client>>,
-) -> impl Responder {
+pub async fn count_nodes(client: web::Data<Arc<Client>>) -> impl Responder {
     match crate::db::count_nodes(&client).await {
         Ok(count) => HttpResponse::Ok().json(count),
         Err(e) => HttpResponse::InternalServerError().body(e.to_string()),
@@ -119,6 +107,6 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
             .service(list_nodes)
             .service(get_node)
             .service(update_node)
-            .service(delete_node)
+            .service(delete_node),
     );
-} 
+}

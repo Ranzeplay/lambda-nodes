@@ -1,8 +1,8 @@
-use actix_web::{web, HttpResponse, Responder, get, post, delete};
 use crate::db::LogLevel;
+use actix_web::{delete, get, post, web, HttpResponse, Responder};
 use serde::Deserialize;
-use tokio_postgres::Client;
 use std::sync::Arc;
+use tokio_postgres::Client;
 
 #[derive(Deserialize)]
 pub struct CreateLogRequest {
@@ -28,10 +28,7 @@ pub async fn create_log(
 }
 
 #[get("/{id}")]
-pub async fn get_log(
-    client: web::Data<Arc<Client>>,
-    id: web::Path<i32>,
-) -> impl Responder {
+pub async fn get_log(client: web::Data<Arc<Client>>, id: web::Path<i32>) -> impl Responder {
     match crate::db::get_log(&client, id.into_inner()).await {
         Ok(Some(log)) => HttpResponse::Ok().json(log),
         Ok(None) => HttpResponse::NotFound().finish(),
@@ -54,10 +51,7 @@ pub async fn list_logs(
 }
 
 #[delete("/{id}")]
-pub async fn delete_log(
-    client: web::Data<Arc<Client>>,
-    id: web::Path<i32>,
-) -> impl Responder {
+pub async fn delete_log(client: web::Data<Arc<Client>>, id: web::Path<i32>) -> impl Responder {
     match crate::db::delete_log(&client, id.into_inner()).await {
         Ok(true) => HttpResponse::NoContent().finish(),
         Ok(false) => HttpResponse::NotFound().finish(),
@@ -66,9 +60,7 @@ pub async fn delete_log(
 }
 
 #[get("/count")]
-pub async fn count_logs(
-    client: web::Data<Arc<Client>>,
-) -> impl Responder {
+pub async fn count_logs(client: web::Data<Arc<Client>>) -> impl Responder {
     match crate::db::count_logs(&client).await {
         Ok(count) => HttpResponse::Ok().json(count),
         Err(e) => HttpResponse::InternalServerError().body(e.to_string()),
@@ -82,6 +74,6 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
             .service(create_log)
             .service(list_logs)
             .service(get_log)
-            .service(delete_log)
+            .service(delete_log),
     );
-} 
+}

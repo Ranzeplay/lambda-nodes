@@ -14,12 +14,12 @@ CREATE INDEX IF NOT EXISTS idx_logs_create_at ON logs (create_at);
 
 CREATE TABLE IF NOT EXISTS nodes
 (
-    id      UUID PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-    is_internal BOOLEAN DEFAULT FALSE NOT NULL,
-    name    TEXT   NOT NULL,
-    script  TEXT   NOT NULL,
-    inputs  TEXT[] NOT NULL  DEFAULT '{}',
-    outputs TEXT[] NOT NULL  DEFAULT '{}'
+    id          UUID PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+    is_internal BOOLEAN          DEFAULT FALSE NOT NULL,
+    name        TEXT   NOT NULL,
+    script      TEXT   NOT NULL,
+    inputs      TEXT[] NOT NULL  DEFAULT '{}',
+    outputs     TEXT[] NOT NULL  DEFAULT '{}'
 );
 
 CREATE INDEX IF NOT EXISTS idx_nodes_name ON nodes (name);

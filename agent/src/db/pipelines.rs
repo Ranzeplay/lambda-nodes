@@ -1,8 +1,8 @@
+use crate::db::models::{HttpMethod, Pipeline};
+use crate::db::utils::row_to_pipeline;
 use anyhow::Result;
 use tokio_postgres::Client;
 use uuid::Uuid;
-use crate::db::models::{HttpMethod, Pipeline};
-use crate::db::utils::row_to_pipeline;
 
 pub async fn create_pipeline(
     client: &Client,
@@ -69,4 +69,4 @@ pub async fn count_pipelines(client: &Client) -> Result<i64> {
         .query_one("SELECT COUNT(*) FROM pipelines", &[])
         .await?;
     Ok(row.get(0))
-} 
+}

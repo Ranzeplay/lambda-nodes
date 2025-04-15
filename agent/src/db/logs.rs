@@ -1,7 +1,7 @@
+use crate::db::models::{Log, LogLevel};
+use crate::db::utils::row_to_log;
 use anyhow::Result;
 use tokio_postgres::Client;
-use crate::db::models::{Log, LogLevel};
-use crate::db::utils::{row_to_log};
 
 pub async fn create_log(client: &Client, level: LogLevel, message: &str) -> Result<Log> {
     let row = client
@@ -41,8 +41,6 @@ pub async fn delete_log(client: &Client, id: i32) -> Result<bool> {
 }
 
 pub async fn count_logs(client: &Client) -> Result<i64> {
-    let row = client
-        .query_one("SELECT COUNT(*) FROM logs", &[])
-        .await?;
+    let row = client.query_one("SELECT COUNT(*) FROM logs", &[]).await?;
     Ok(row.get(0))
-} 
+}

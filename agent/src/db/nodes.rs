@@ -1,15 +1,15 @@
+use crate::db::models::Node;
+use crate::db::utils::row_to_node;
 use anyhow::Result;
 use tokio_postgres::Client;
 use uuid::Uuid;
-use crate::db::models::Node;
-use crate::db::utils::row_to_node;
 
 pub async fn create_node(
-    client: &Client, 
-    name: &str, 
-    script: &str, 
-    inputs: &[String], 
-    outputs: &[String]
+    client: &Client,
+    name: &str,
+    script: &str,
+    inputs: &[String],
+    outputs: &[String],
 ) -> Result<Node> {
     let row = client
         .query_one(
@@ -65,8 +65,6 @@ pub async fn list_nodes(client: &Client, limit: i64, offset: i64) -> Result<Vec<
 }
 
 pub async fn count_nodes(client: &Client) -> Result<i64> {
-    let row = client
-        .query_one("SELECT COUNT(*) FROM nodes", &[])
-        .await?;
+    let row = client.query_one("SELECT COUNT(*) FROM nodes", &[]).await?;
     Ok(row.get(0))
-} 
+}

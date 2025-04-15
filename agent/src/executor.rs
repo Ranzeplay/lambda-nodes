@@ -1,3 +1,4 @@
+use crate::blocks::boolean::{bool_false, bool_true, LNBoolean};
 use crate::db::flow::{Graph, GraphNode};
 use crate::db::get_node;
 use crate::db::models::Node;
@@ -10,7 +11,6 @@ use std::collections::HashMap;
 use std::rc::Rc;
 use tokio_postgres::Client;
 use uuid::Uuid;
-use crate::blocks::boolean::{bool_false, bool_true, LNBoolean};
 
 #[derive(Debug, Clone)]
 pub struct CombinedNode {
@@ -114,7 +114,7 @@ impl GraphExecutor {
             .collect::<Vec<CombinedNode>>();
         self.current_node_queue = nodes;
     }
-    
+
     pub fn update_next_node_queue(&mut self) {
         let mut nodes = vec![];
         for node in &self.current_node_queue {
@@ -122,24 +122,26 @@ impl GraphExecutor {
                 .graph
                 .edges
                 .iter()
-                .filter(|edge| edge.source == node.graph_node.id && edge.source_handle == "from-node")
+                .filter(|edge| {
+                    edge.source == node.graph_node.id && edge.source_handle == "from-node"
+                })
                 .collect::<Vec<_>>();
-            
+
             for edge in edges {
                 let target_node = self
                     .nodes
                     .get(&edge.target)
                     .expect(format!("Target node not found for edge: {}", edge.id).as_str());
-                
+
                 nodes.push(target_node.clone());
             }
         }
         // Distinct by node graph id
         // nodes.dedup_by(|a, b| a.graph_node.id == b.graph_node.id);
-        
+
         self.next_node_queue = nodes;
     }
-    
+
     pub fn exec_current_queue(&mut self) -> Result<(), AnyError> {
         let queue = self.current_node_queue.clone();
         for node in queue {
@@ -148,7 +150,7 @@ impl GraphExecutor {
         }
         Ok(())
     }
-    
+
     pub fn apply_next_queue(&mut self) {
         self.current_node_queue = self.next_node_queue.clone();
         self.next_node_queue = vec![];
@@ -157,7 +159,7 @@ impl GraphExecutor {
     pub fn has_next_node(&self) -> bool {
         !self.next_node_queue.is_empty()
     }
-    
+
     pub fn has_node(&self) -> bool {
         !self.current_node_queue.is_empty()
     }
@@ -187,7 +189,10 @@ impl GraphExecutor {
                 edge.target == self.current_node.graph_node.id && edge.target_handle != "to-node"
             })
             .map(|edge| {
-                let source_data = self.data_cache.get(&edge.source).expect(format!("Source data not found for edge: {}", edge.id).as_str());
+                let source_data = self
+                    .data_cache
+                    .get(&edge.source)
+                    .expect(format!("Source data not found for edge: {}", edge.id).as_str());
                 let source_handle = edge.source_handle.trim_start_matches("output-").to_string();
                 let data = source_data.get(&source_handle).unwrap().clone();
 
@@ -201,7 +206,7 @@ impl GraphExecutor {
                 let condition = in_data.get("condition").unwrap().clone();
                 let condition = condition.to_v8(scope);
                 let condition = serde_v8::from_v8::<LNBoolean>(scope, condition)?;
-                
+
                 if !condition.value {
                     self.current_node_queue = self
                         .current_node_queue
@@ -213,18 +218,21 @@ impl GraphExecutor {
             } else if self.current_node.db_node.name == "True" {
                 let mut out_data = HashMap::new();
                 out_data.insert("out".to_string(), bool_true(scope));
-                self.data_cache.insert(self.current_node.graph_node.id.clone(), out_data);
+                self.data_cache
+                    .insert(self.current_node.graph_node.id.clone(), out_data);
             } else if self.current_node.db_node.name == "False" {
                 let mut out_data = HashMap::new();
                 out_data.insert("out".to_string(), bool_false(scope));
-                self.data_cache.insert(self.current_node.graph_node.id.clone(), out_data);
+                self.data_cache
+                    .insert(self.current_node.graph_node.id.clone(), out_data);
             } else if self.current_node.db_node.name == "Empty" {
                 let obj = Object::new(scope);
                 let obj = Global::new(scope, obj);
-                
+
                 let mut out_data = HashMap::new();
                 out_data.insert("out".to_string(), obj);
-                self.data_cache.insert(self.current_node.graph_node.id.clone(), out_data);
+                self.data_cache
+                    .insert(self.current_node.graph_node.id.clone(), out_data);
             } else if self.current_node.db_node.name == "EndRequest" {
                 self.reached_end = true;
                 self.end_node_graph_id = self.current_node.graph_node.id.clone();
@@ -330,7 +338,6 @@ fn get_combined_nodes(graph: Graph, db_nodes: Vec<Node>) -> HashMap<String, Comb
     combined_nodes
 }
 
-
 fn value_to_json(
     scope: &mut v8::HandleScope,
     value: Local<v8::Value>,
@@ -371,4 +378,3 @@ pub fn global_object_to_json(
 
     Ok(json_string)
 }
-

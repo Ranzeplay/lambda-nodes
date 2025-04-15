@@ -30,4 +30,4 @@ pub fn row_to_pipeline(row: Row) -> Pipeline {
         method: row.get(3),
         url: row.get(4),
     }
-} 
+}
