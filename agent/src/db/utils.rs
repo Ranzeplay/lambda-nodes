@@ -35,11 +35,10 @@ pub fn row_to_node(row: Row) -> Node {
 }
 
 pub fn row_to_pipeline(row: Row) -> Pipeline {
-    let content_str: String = row.get(2);
     Pipeline {
         id: row.get(0),
         name: row.get(1),
-        content: sql_to_json(&content_str).unwrap_or(serde_json::Value::Null),
+        content: row.get(2),
         method: row.get(3),
         url: row.get(4),
     }

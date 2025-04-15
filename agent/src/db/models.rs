@@ -66,51 +66,7 @@ pub struct Node {
     pub outputs: Vec<String>,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
-#[serde(rename_all = "camelCase")]
-pub enum HttpMethod {
-    GET,
-    POST,
-    PUT,
-    DELETE,
-    PATCH,
-}
-
-impl<'a> ToSql for HttpMethod {
-    fn to_sql(&self, ty: &Type, out: &mut BytesMut) -> Result<IsNull, Box<dyn Error + Sync + Send>> {
-        match self {
-            HttpMethod::GET => "GET",
-            HttpMethod::POST => "POST",
-            HttpMethod::PUT => "PUT",
-            HttpMethod::DELETE => "DELETE",
-            HttpMethod::PATCH => "PATCH",
-        }.to_sql(ty, out)
-    }
-
-    fn accepts(ty: &Type) -> bool {
-        ty == &Type::VARCHAR
-    }
-
-    to_sql_checked!();
-}
-
-impl<'a> FromSql<'a> for HttpMethod {
-    fn from_sql(ty: &Type, raw: &'a [u8]) -> Result<Self, Box<dyn Error + Sync + Send>> {
-        let s: String = FromSql::from_sql(ty, raw)?;
-        match s.as_str() {
-            "GET" => Ok(HttpMethod::GET),
-            "POST" => Ok(HttpMethod::POST),
-            "PUT" => Ok(HttpMethod::PUT),
-            "DELETE" => Ok(HttpMethod::DELETE),
-            "PATCH" => Ok(HttpMethod::PATCH),
-            _ => Err(format!("invalid HTTP method: {}", s).into()),
-        }
-    }
-
-    fn accepts(ty: &Type) -> bool {
-        ty == &Type::VARCHAR
-    }
-}
+pub type HttpMethod = String;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Pipeline {

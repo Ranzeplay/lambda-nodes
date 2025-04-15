@@ -24,14 +24,12 @@ CREATE TABLE IF NOT EXISTS nodes
 
 CREATE INDEX IF NOT EXISTS idx_nodes_name ON nodes (name);
 
-CREATE TYPE http_method AS ENUM ('GET', 'POST', 'PUT', 'DELETE', 'PATCH');
-
 CREATE TABLE IF NOT EXISTS pipelines
 (
     id      UUID PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
     name    TEXT                                       NOT NULL,
     content JSON                                       NOT NULL,
-    method  http_method                                NOT NULL,
+    method  TEXT                                       NOT NULL,
     url     TEXT                                       NOT NULL
 );
 

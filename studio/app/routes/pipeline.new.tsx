@@ -12,6 +12,8 @@ import { fetchAllNodes, type NodeIndexData } from "~/lib/nodeModel";
 import { toast } from "sonner";
 import { DrawerTrigger, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription, DrawerFooter, DrawerClose, Drawer } from "~/components/ui/drawer";
 import { v4 as uuidv4 } from 'uuid';
+import { useNavigate } from "react-router";
+import { serverAddress } from "~/lib/env";
 
 const nodeTypes = { flowNode: FlowNode };
 
@@ -62,6 +64,33 @@ export default function NewPipelinePage() {
 
 		setNodeAditionDrawerOpen(false);
 	}
+
+	async function submit() {
+		const result = await fetch(serverAddress + "/api/pipelines", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({
+				name,
+				method,
+				url: route,
+				content: {
+					nodes,
+					edges
+				}
+			}),
+		});
+
+		if (result.ok) {
+			toast.success("Pipeline created successfully!");
+			navigate("/pipelines");
+		} else {
+			toast.error("Failed to create pipeline. Please try again.");
+		}
+	}
+
+	const navigate = useNavigate();
 
 	return (
 		<FrameView title="Pipelines" subtitle="Create new pipeline">
@@ -129,8 +158,8 @@ export default function NewPipelinePage() {
 				</div>
 
 				<div className="flex flex-row space-x-4">
-					<Button>Submit</Button>
-					<Button variant={"secondary"}>Cancel</Button>
+					<Button onClick={submit}>Submit</Button>
+					<Button variant={"secondary"} onClick={() => navigate("/pipelines")}>Cancel</Button>
 				</div>
 			</div>
 		</FrameView>

@@ -130,7 +130,7 @@ export default function NewNodePage() {
 				</div>
 				<div className="flex flex-row space-x-4">
 					<Button onClick={submit}>Submit</Button>
-					<Button variant={"secondary"}>Cancel</Button>
+					<Button variant={"secondary"} onClick={() => navigate("/library")}>Cancel</Button>
 				</div>
 			</div>
 		</FrameView>

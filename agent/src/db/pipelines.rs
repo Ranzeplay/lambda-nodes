@@ -11,11 +11,10 @@ pub async fn create_pipeline(
     method: HttpMethod,
     url: &str,
 ) -> Result<Pipeline> {
-    let content_str = json_to_sql(content);
     let row = client
         .query_one(
             "INSERT INTO pipelines (name, content, method, url) VALUES ($1, $2, $3, $4) RETURNING id, name, content, method, url",
-            &[&name, &content_str, &method, &url],
+            &[&name, &content, &method, &url],
         )
         .await?;
     Ok(row_to_pipeline(row))
@@ -39,11 +38,10 @@ pub async fn update_pipeline(
     method: HttpMethod,
     url: &str,
 ) -> Result<Option<Pipeline>> {
-    let content_str = json_to_sql(content);
     let row = client
         .query_opt(
             "UPDATE pipelines SET name = $2, content = $3, method = $4, url = $5 WHERE id = $1 RETURNING id, name, content, method, url",
-            &[&id, &name, &content_str, &method, &url],
+            &[&id, &name, &content, &method, &url],
         )
         .await?;
     Ok(row.map(row_to_pipeline))

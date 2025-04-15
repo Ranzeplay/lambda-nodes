@@ -6,7 +6,6 @@ DROP TABLE IF EXISTS nodes;
 DROP TABLE IF EXISTS logs;
 
 -- Drop custom types
-DROP TYPE IF EXISTS http_method;
 DROP TYPE IF EXISTS log_level;
 
 COMMIT;

@@ -6,22 +6,25 @@ use uuid::Uuid;
 use std::sync::Arc;
 
 #[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct CreatePipelineRequest {
     name: String,
     content: serde_json::Value,
-    method: HttpMethod,
+    method: String,
     url: String,
 }
 
 #[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct UpdatePipelineRequest {
     name: String,
     content: serde_json::Value,
-    method: HttpMethod,
+    method: String,
     url: String,
 }
 
 #[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ListPipelinesQuery {
     limit: Option<i64>,
     offset: Option<i64>,
