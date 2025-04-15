@@ -52,6 +52,7 @@ export default function NewPipelinePage() {
 			type: 'flowNode',
 			position: { x: 0, y: 0 },
 			data: {
+				id: node.id,
 				name: node.name,
 				inputs: node.inputs,
 				outputs: node.outputs,

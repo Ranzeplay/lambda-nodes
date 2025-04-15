@@ -1,17 +1,5 @@
-use anyhow::Result;
-use std::error::Error;
-use tokio_postgres::Row;
 use crate::db::models::{Log, Node, Pipeline};
-
-// Helper function to convert serde_json::Value to SQL string
-pub fn json_to_sql(value: &serde_json::Value) -> String {
-    value.to_string()
-}
-
-// Helper function to convert SQL string to serde_json::Value
-pub fn sql_to_json(s: &str) -> Result<serde_json::Value, Box<dyn Error + Sync + Send>> {
-    Ok(serde_json::from_str(s)?)
-}
+use tokio_postgres::Row;
 
 // Helper functions to convert database rows to structs
 pub fn row_to_log(row: Row) -> Log {

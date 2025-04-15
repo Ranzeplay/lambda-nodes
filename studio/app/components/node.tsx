@@ -20,9 +20,23 @@ function getColor(status: NodeData['status']) {
 export default function FlowNode({ data, isConnectable }: { data: NodeData, isConnectable: boolean }) {
 	return (
 		<div className="w-80 border border-gray-300 shadow rounded-md flex flex-col bg-white">
-			<div className={`${getColor(data.status)} px-2.5 py-1.5 rounded-t-md flex flex-row space-x-2 items-center`}>
+			<div className={`${getColor(data.status)} px-2.5 py-1.5 rounded-t-md flex flex-row relative space-x-2 items-center`}>
 				<FunctionSquare />
 				<h3>{data.name}</h3>
+				<Handle
+							type="target"
+							position={Position.Left}
+							isConnectable={isConnectable}
+							className="!w-2.5 !h-2.5 !bg-white"
+							id={`from-node`}
+						/>
+				<Handle
+							type="source"
+							position={Position.Right}
+							isConnectable={isConnectable}
+							className="!w-2.5 !h-2.5 !bg-white"
+							id={`to-node`}
+						/>
 			</div>
 
 			<div>

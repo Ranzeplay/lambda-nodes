@@ -2,7 +2,7 @@ use anyhow::Result;
 use tokio_postgres::Client;
 use uuid::Uuid;
 use crate::db::models::{HttpMethod, Pipeline};
-use crate::db::utils::{json_to_sql, row_to_pipeline};
+use crate::db::utils::row_to_pipeline;
 
 pub async fn create_pipeline(
     client: &Client,

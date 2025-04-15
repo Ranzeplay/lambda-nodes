@@ -1,9 +1,8 @@
-use actix_web::{web, HttpResponse, Responder, get, post, put, delete};
-use crate::db::HttpMethod;
+use actix_web::{delete, get, post, put, web, HttpResponse, Responder};
 use serde::Deserialize;
+use std::sync::Arc;
 use tokio_postgres::Client;
 use uuid::Uuid;
-use std::sync::Arc;
 
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
