@@ -21,6 +21,8 @@ async fn main() -> anyhow::Result<()> {
         .user(&env::var("DB_USER").unwrap_or_else(|_| "postgres".to_string()))
         .password(&env::var("DB_PASSWORD").unwrap_or_else(|_| "postgres".to_string()));
 
+    env_logger::init_from_env(env_logger::Env::new().default_filter_or("info"));
+
     let (client, connection) = cfg.connect(NoTls).await?;
     
     // Spawn the connection handler
