@@ -151,7 +151,7 @@ export default function NewPipelinePage() {
 							</SelectContent>
 						</Select>
 						<div className="flex flex-row space-x-1 items-center grow">
-							<p className="font-mono">/pipeline/</p>
+							<p className="font-mono">/exec/</p>
 							<Input type="text" className="font-mono grow" value={route} onChange={(n) => setRoute(n.target.value)} />
 						</div>
 					</div>
