@@ -24,19 +24,19 @@ export default function FlowNode({ data, isConnectable }: { data: NodeData, isCo
 				<FunctionSquare />
 				<h3>{data.name}</h3>
 				<Handle
-							type="target"
-							position={Position.Left}
-							isConnectable={isConnectable}
-							className="!w-2.5 !h-2.5 !bg-black"
-							id={`to-node`}
-						/>
+					type="target"
+					position={Position.Left}
+					isConnectable={isConnectable}
+					className="!w-2.5 !h-2.5 !bg-black"
+					id={`to-node`}
+				/>
 				<Handle
-							type="source"
-							position={Position.Right}
-							isConnectable={isConnectable}
-							className="!w-2.5 !h-2.5 !bg-black"
-							id={`from-node`}
-						/>
+					type="source"
+					position={Position.Right}
+					isConnectable={isConnectable}
+					className="!w-2.5 !h-2.5 !bg-black"
+					id={`from-node`}
+				/>
 			</div>
 
 			<div>

@@ -5,8 +5,8 @@ edition = "2024"
 
 [dependencies]
 deno_core = { version = "~0.343", features = ["default"] }
-deno_web = "~0.231"
-deno_fetch = "~0.224"
+deno_web = "~0.232"
+deno_fetch = "~0.225"
 serde_json = { version = "~1.0" }
 serde = { version = "~1.0", features = ["derive"] }
 cron_tab = "~0.2"

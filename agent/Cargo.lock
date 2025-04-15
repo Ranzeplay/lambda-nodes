@@ -857,9 +857,9 @@ dependencies = [
 
 [[package]]
 name = "deno_fetch"
-version = "0.224.0"
+version = "0.225.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8c747a139a5dedf57493d9f7de00b3f7c27681b866b42bfd33e34d6d5adb618d"
+checksum = "f9e3a34d21d665aba65a0651ecf115d5605ff9693ed481c0592e52a2cffae390"
 dependencies = [
  "base64",
  "bytes",
@@ -896,9 +896,9 @@ dependencies = [
 
 [[package]]
 name = "deno_fs"
-version = "0.110.0"
+version = "0.111.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "215ae86dad60a866035a154c5f3a6a4b0e0422067efb2cf81df7ebd61f50dd99"
+checksum = "2405b037a778b1a76bf0fc6c8fe2a48130841149c3173a50aa1765cf55ca3f09"
 dependencies = [
  "async-trait",
  "base32",
@@ -922,9 +922,9 @@ dependencies = [
 
 [[package]]
 name = "deno_io"
-version = "0.110.0"
+version = "0.111.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dbccfbea272cdbb713c74c823564550955fc1348fdce97e8998f1cfe3bfc3f41"
+checksum = "59abd1f32e645b3ba1e4434f039a6f5e7b02307d278ad12e9eee7d5477b2af92"
 dependencies = [
  "async-trait",
  "deno_core",
@@ -989,9 +989,9 @@ dependencies = [
 
 [[package]]
 name = "deno_permissions"
-version = "0.59.0"
+version = "0.60.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c9775a22be50f4729610f41e1d59b14fddb0d076168709e34cf7a25ae3037637"
+checksum = "6fb68a72eb33a3c2f7d736e2d46a39777427fc16a0ecc70936906d4841251124"
 dependencies = [
  "capacity_builder",
  "deno_core",
@@ -1021,9 +1021,9 @@ dependencies = [
 
 [[package]]
 name = "deno_tls"
-version = "0.187.0"
+version = "0.188.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ca0008c63c819d87c2378133e115d064f9d7b9100ed071e8f68292a31560f402"
+checksum = "13c31bf7e60ab4f371963e7b624850a1644980adf005d0d79b9f7264c6cde6ba"
 dependencies = [
  "deno_core",
  "deno_error",
@@ -1051,9 +1051,9 @@ dependencies = [
 
 [[package]]
 name = "deno_web"
-version = "0.231.0"
+version = "0.232.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a0d5e1348872b3d3a2598cbb43e3deedc873248f63e41528e207f01b3ffb9c09"
+checksum = "25a15b9a307691951ddf176f93eb106de649c0d868ab098857ac900d72393b9a"
 dependencies = [
  "async-trait",
  "base64-simd 0.8.0",

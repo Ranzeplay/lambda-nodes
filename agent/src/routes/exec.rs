@@ -34,16 +34,21 @@ pub async fn exec(
     let pipeline_graph: Graph = serde_json::from_value(pipeline_graph_item).unwrap();
 
     let mut executor = GraphExecutor::new(pipeline_graph, &client).await.unwrap();
-    executor.init_entry(json.into_inner()).expect("Failed to init entry value");
-    
+    if let Err(_) = executor.init_entry(json.into_inner()) {
+        return HttpResponse::InternalServerError().body("Failed to initialize pipeline entry");
+    }
+
     while executor.has_next_node() {
         executor.set_next_node();
         if let Err(e) = executor.exec_current_node() {
             return HttpResponse::InternalServerError().body(format!("{:?}", e));
         }
     }
-    
-    let result = executor.get_result().expect("Failed to get result");
 
-    HttpResponse::Ok().json(result)
+    let result = executor.get_result();
+    if result.is_err() {
+        return HttpResponse::InternalServerError().body("Failed to get execution result");
+    }
+
+    HttpResponse::Ok().json(result.unwrap())
 }
