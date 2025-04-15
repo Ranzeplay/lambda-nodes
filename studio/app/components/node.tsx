@@ -28,15 +28,15 @@ export default function FlowNode({ data, isConnectable }: { data: NodeData, isCo
 			<div>
 				{data.inputs.length === 0 ? (
 					<h3 className="m-2 font-mono text-sm text-gray-500">No input</h3>
-				) : data.inputs.map((i, index) => (
+				) : data.inputs.map((name, index) => (
 					<div key={index} className="relative flex flex-row space-x-2 items-center px-2 py-1.5">
-						<span className="text-gray-700 font-mono">{i}</span>
+						<span className="text-gray-700 font-mono">{name}</span>
 						<Handle
 							type="target"
 							position={Position.Left}
 							isConnectable={isConnectable}
 							className="!w-2.5 !h-2.5 !bg-black"
-							id={`input-${index}`}
+							id={`input-${name}`}
 						/>
 					</div>
 				))}
@@ -45,15 +45,15 @@ export default function FlowNode({ data, isConnectable }: { data: NodeData, isCo
 
 				{data.outputs.length === 0 ? (
 					<h3 className="m-2 font-mono text-sm text-gray-500">No output</h3>
-				) : data.outputs.map((o, index) => (
+				) : data.outputs.map((name, index) => (
 					<div key={index} className="relative flex flex-row space-x-2 items-center px-2 py-1.5">
-						<span className="text-gray-700 font-mono">{o}</span>
+						<span className="text-gray-700 font-mono">{name}</span>
 						<Handle
 							type="source"
 							position={Position.Right}
 							isConnectable={isConnectable}
 							className="!w-2.5 !h-2.5 !bg-black"
-							id={`output-${index}`}
+							id={`output-${name}`}
 						/>
 					</div>
 				))}
