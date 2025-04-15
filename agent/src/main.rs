@@ -1,6 +1,6 @@
 mod db;
 mod routes;
-mod exec_graph;
+mod executor;
 
 use actix_cors::Cors;
 use actix_web::middleware::Logger;

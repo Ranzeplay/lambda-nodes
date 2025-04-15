@@ -3,7 +3,7 @@ use std::sync::Arc;
 use serde_json::Value;
 use tokio_postgres::Client;
 use crate::db::flow::Graph;
-use crate::exec_graph::exec_graph;
+use crate::executor::GraphExecutor;
 
 #[route(
     "/exec/{tail:.*}",
@@ -21,8 +21,6 @@ pub async fn exec(
 ) -> impl Responder {
     let tail = path.into_inner();
 
-    println!("path: {}", tail);
-
     let pipeline_graph_result = client.query_one(
         "SELECT content FROM pipelines WHERE url = $1 AND method = $2 LIMIT 1",
         &[&tail, &req.method().as_str()],
@@ -35,7 +33,17 @@ pub async fn exec(
     let pipeline_graph_item = pipeline_graph_result.unwrap().get(0);
     let pipeline_graph: Graph = serde_json::from_value(pipeline_graph_item).unwrap();
 
-    exec_graph(pipeline_graph, json.into_inner(), &client).await;
+    let mut executor = GraphExecutor::new(pipeline_graph, &client).await.unwrap();
+    executor.init_entry(json.into_inner()).expect("Failed to init entry value");
+    
+    while executor.has_next_node() {
+        executor.set_next_node();
+        if let Err(e) = executor.exec_current_node() {
+            return HttpResponse::InternalServerError().body(format!("{:?}", e));
+        }
+    }
+    
+    let result = executor.get_result().expect("Failed to get result");
 
-    HttpResponse::Ok().finish()
+    HttpResponse::Ok().json(result)
 }

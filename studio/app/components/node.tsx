@@ -28,14 +28,14 @@ export default function FlowNode({ data, isConnectable }: { data: NodeData, isCo
 							position={Position.Left}
 							isConnectable={isConnectable}
 							className="!w-2.5 !h-2.5 !bg-white"
-							id={`from-node`}
+							id={`to-node`}
 						/>
 				<Handle
 							type="source"
 							position={Position.Right}
 							isConnectable={isConnectable}
 							className="!w-2.5 !h-2.5 !bg-white"
-							id={`to-node`}
+							id={`from-node`}
 						/>
 			</div>
 
