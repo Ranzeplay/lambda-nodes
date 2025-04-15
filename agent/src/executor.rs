@@ -10,9 +10,10 @@ use std::collections::HashMap;
 use std::rc::Rc;
 use tokio_postgres::Client;
 use uuid::Uuid;
+use crate::blocks::boolean::{bool_false, bool_true, LNBoolean};
 
 #[derive(Debug, Clone)]
-struct CombinedNode {
+pub struct CombinedNode {
     pub graph_node: GraphNode,
     pub db_node: Node,
 }
@@ -26,8 +27,9 @@ pub struct GraphExecutor {
     entry_node_graph_id: String,
     end_node_graph_id: String,
 
-    current_node_queue: Vec<CombinedNode>,
-    next_node_queue: Vec<CombinedNode>,
+    pub current_node_queue: Vec<CombinedNode>,
+    pub next_node_queue: Vec<CombinedNode>,
+    pub reached_end: bool,
 }
 
 impl GraphExecutor {
@@ -81,6 +83,7 @@ impl GraphExecutor {
             end_node_graph_id: end_node.graph_node.id.clone(),
             current_node_queue: vec![],
             next_node_queue: vec![],
+            reached_end: false,
         })
     }
 
@@ -113,22 +116,27 @@ impl GraphExecutor {
     }
     
     pub fn update_next_node_queue(&mut self) {
-        let nodes = self.current_node_queue
-            .iter()
-            .filter_map(|node| {
-                let next_node = self
-                    .graph
-                    .edges
-                    .iter()
-                    .find(|edge| {
-                        edge.source == node.graph_node.id && edge.source_handle == "from-node"
-                    })
-                    .and_then(|edge| {
-                        self.nodes.get(&edge.target).cloned()
-                    });
-                next_node
-            })
-            .collect::<Vec<CombinedNode>>();
+        let mut nodes = vec![];
+        for node in &self.current_node_queue {
+            let edges = self
+                .graph
+                .edges
+                .iter()
+                .filter(|edge| edge.source == node.graph_node.id && edge.source_handle == "from-node")
+                .collect::<Vec<_>>();
+            
+            for edge in edges {
+                let target_node = self
+                    .nodes
+                    .get(&edge.target)
+                    .expect(format!("Target node not found for edge: {}", edge.id).as_str());
+                
+                nodes.push(target_node.clone());
+            }
+        }
+        // Distinct by node graph id
+        // nodes.dedup_by(|a, b| a.graph_node.id == b.graph_node.id);
+        
         self.next_node_queue = nodes;
     }
     
@@ -143,11 +151,15 @@ impl GraphExecutor {
     
     pub fn apply_next_queue(&mut self) {
         self.current_node_queue = self.next_node_queue.clone();
-        self.next_node_queue.clear();
+        self.next_node_queue = vec![];
     }
 
     pub fn has_next_node(&self) -> bool {
         !self.next_node_queue.is_empty()
+    }
+    
+    pub fn has_node(&self) -> bool {
+        !self.current_node_queue.is_empty()
     }
 
     pub fn exec_current_node(&mut self) -> Result<(), AnyError> {
@@ -175,7 +187,7 @@ impl GraphExecutor {
                 edge.target == self.current_node.graph_node.id && edge.target_handle != "to-node"
             })
             .map(|edge| {
-                let source_data = self.data_cache.get(&edge.source).unwrap();
+                let source_data = self.data_cache.get(&edge.source).expect(format!("Source data not found for edge: {}", edge.id).as_str());
                 let source_handle = edge.source_handle.trim_start_matches("output-").to_string();
                 let data = source_data.get(&source_handle).unwrap().clone();
 
@@ -184,9 +196,42 @@ impl GraphExecutor {
             })
             .collect::<HashMap<_, _>>();
 
-        if self.current_node.graph_node.id == self.end_node_graph_id {
-            self.data_cache
-                .insert(self.current_node.graph_node.id.clone(), in_data);
+        if self.current_node.db_node.is_internal {
+            if self.current_node.db_node.name == "Breaker" {
+                let condition = in_data.get("condition").unwrap().clone();
+                let condition = condition.to_v8(scope);
+                let condition = serde_v8::from_v8::<LNBoolean>(scope, condition)?;
+                
+                if !condition.value {
+                    self.current_node_queue = self
+                        .current_node_queue
+                        .iter()
+                        .filter(|node| node.graph_node.id != self.current_node.graph_node.id)
+                        .cloned()
+                        .collect();
+                }
+            } else if self.current_node.db_node.name == "True" {
+                let mut out_data = HashMap::new();
+                out_data.insert("out".to_string(), bool_true(scope));
+                self.data_cache.insert(self.current_node.graph_node.id.clone(), out_data);
+            } else if self.current_node.db_node.name == "False" {
+                let mut out_data = HashMap::new();
+                out_data.insert("out".to_string(), bool_false(scope));
+                self.data_cache.insert(self.current_node.graph_node.id.clone(), out_data);
+            } else if self.current_node.db_node.name == "Empty" {
+                let obj = Object::new(scope);
+                let obj = Global::new(scope, obj);
+                
+                let mut out_data = HashMap::new();
+                out_data.insert("out".to_string(), obj);
+                self.data_cache.insert(self.current_node.graph_node.id.clone(), out_data);
+            } else if self.current_node.db_node.name == "EndRequest" {
+                self.reached_end = true;
+                self.end_node_graph_id = self.current_node.graph_node.id.clone();
+                self.data_cache
+                    .insert(self.current_node.graph_node.id.clone(), in_data);
+            }
+
             return Ok(());
         }
 
@@ -285,7 +330,7 @@ fn get_combined_nodes(graph: Graph, db_nodes: Vec<Node>) -> HashMap<String, Comb
     combined_nodes
 }
 
-/*
+
 fn value_to_json(
     scope: &mut v8::HandleScope,
     value: Local<v8::Value>,
@@ -299,7 +344,7 @@ fn value_to_json(
     Ok(json_string)
 }
 
-pub fn object_to_json(
+pub fn local_object_to_json(
     scope: &mut v8::HandleScope,
     value: Local<v8::Object>,
 ) -> Result<String, anyhow::Error> {
@@ -312,4 +357,18 @@ pub fn object_to_json(
 
     Ok(json_string)
 }
-*/
+
+pub fn global_object_to_json(
+    scope: &mut v8::HandleScope,
+    value: Global<v8::Object>,
+) -> Result<String, anyhow::Error> {
+    // First deserialize the V8 value to a Rust value that serde can handle
+    let value = value.to_v8(scope);
+    let rust_value: serde_json::Value = serde_v8::from_v8(scope, value)?;
+
+    // Then serialize the Rust value to a JSON string
+    let json_string = serde_json::to_string(&rust_value)?;
+
+    Ok(json_string)
+}
+

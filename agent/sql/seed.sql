@@ -1,6 +1,5 @@
 BEGIN;
 
--- Seed the nodes table with an OnRequest node
 INSERT INTO nodes (name, is_internal, script, inputs, outputs)
 VALUES (
     'BeginRequest',
@@ -10,7 +9,6 @@ VALUES (
     ARRAY['data', 'context']
 );
 
--- Seed the nodes table with an EndRequest node
 INSERT INTO nodes (name, is_internal, script, inputs, outputs)
 VALUES (
     'EndRequest',
@@ -19,5 +17,41 @@ VALUES (
     ARRAY['data', 'context'],
     '{}'
 );
+
+INSERT INTO nodes (name, is_internal, script, inputs, outputs)
+VALUES (
+           'True',
+           TRUE,
+           'internal',
+           '{}',
+           ARRAY['out']
+       );
+
+INSERT INTO nodes (name, is_internal, script, inputs, outputs)
+VALUES (
+           'False',
+           TRUE,
+           'internal',
+           '{}',
+           ARRAY['out']
+       );
+
+INSERT INTO nodes (name, is_internal, script, inputs, outputs)
+VALUES (
+           'Breaker',
+           TRUE,
+           'internal',
+           ARRAY['condition'],
+           '{}'
+       );
+
+INSERT INTO nodes (name, is_internal, script, inputs, outputs)
+VALUES (
+           'Empty',
+           TRUE,
+           'internal',
+           '{}',
+           ARRAY['out']
+       );
 
 COMMIT;

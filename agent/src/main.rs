@@ -1,6 +1,7 @@
 mod db;
 mod routes;
 mod executor;
+pub(crate) mod blocks;
 
 use actix_cors::Cors;
 use actix_web::middleware::Logger;
