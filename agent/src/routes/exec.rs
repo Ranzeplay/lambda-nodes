@@ -37,12 +37,15 @@ pub async fn exec(
     if let Err(_) = executor.init_entry(json.into_inner()) {
         return HttpResponse::InternalServerError().body("Failed to initialize pipeline entry");
     }
+    executor.init_node_queue();
+    executor.update_next_node_queue();
 
     while executor.has_next_node() {
-        executor.set_next_node();
-        if let Err(e) = executor.exec_current_node() {
-            return HttpResponse::InternalServerError().body(format!("{:?}", e));
+        executor.apply_next_queue();
+        if let Err(_) = executor.exec_current_queue() {
+            return HttpResponse::InternalServerError().body("Failed to execute current queue");
         }
+        executor.update_next_node_queue();
     }
 
     let result = executor.get_result();

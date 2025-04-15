@@ -25,6 +25,9 @@ pub struct GraphExecutor {
     current_node: CombinedNode,
     entry_node_graph_id: String,
     end_node_graph_id: String,
+
+    current_node_queue: Vec<CombinedNode>,
+    next_node_queue: Vec<CombinedNode>,
 }
 
 impl GraphExecutor {
@@ -76,6 +79,8 @@ impl GraphExecutor {
             current_node: entry_node.clone(),
             entry_node_graph_id: entry_node.graph_node.id.clone(),
             end_node_graph_id: end_node.graph_node.id.clone(),
+            current_node_queue: vec![],
+            next_node_queue: vec![],
         })
     }
 
@@ -91,36 +96,58 @@ impl GraphExecutor {
         Ok(())
     }
 
-    pub fn has_next_node(&self) -> bool {
-        self.current_node.graph_node.id != self.end_node_graph_id
+    pub fn init_node_queue(&mut self) {
+        let nodes = self
+            .nodes
+            .values()
+            .filter(|&n| {
+                self.graph
+                    .edges
+                    .iter()
+                    .find(|&e| e.target == n.graph_node.id && e.target_handle == "to-node")
+                    .is_none()
+            })
+            .map(|n| n.clone())
+            .collect::<Vec<CombinedNode>>();
+        self.current_node_queue = nodes;
+    }
+    
+    pub fn update_next_node_queue(&mut self) {
+        let nodes = self.current_node_queue
+            .iter()
+            .filter_map(|node| {
+                let next_node = self
+                    .graph
+                    .edges
+                    .iter()
+                    .find(|edge| {
+                        edge.source == node.graph_node.id && edge.source_handle == "from-node"
+                    })
+                    .and_then(|edge| {
+                        self.nodes.get(&edge.target).cloned()
+                    });
+                next_node
+            })
+            .collect::<Vec<CombinedNode>>();
+        self.next_node_queue = nodes;
+    }
+    
+    pub fn exec_current_queue(&mut self) -> Result<(), AnyError> {
+        let queue = self.current_node_queue.clone();
+        for node in queue {
+            self.current_node = node;
+            self.exec_current_node()?;
+        }
+        Ok(())
+    }
+    
+    pub fn apply_next_queue(&mut self) {
+        self.current_node_queue = self.next_node_queue.clone();
+        self.next_node_queue.clear();
     }
 
-    pub fn get_next_node_id(&mut self) -> String {
-        let current_node = self
-            .nodes
-            .get(&self.current_node.graph_node.id)
-            .expect(&*("Current node not found ".to_owned() + &*self.current_node.graph_node.id));
-
-        let step_edge = self
-            .graph
-            .edges
-            .iter()
-            .find(|edge| {
-                edge.source == current_node.graph_node.id && edge.source_handle == "from-node"
-            })
-            .expect(&*("Graph edge not found ".to_owned() + &*current_node.graph_node.id));
-        let target_node = self
-            .graph
-            .nodes
-            .iter()
-            .find(|n| n.id == step_edge.target)
-            .unwrap();
-        let next_node = self
-            .nodes
-            .get(&target_node.id)
-            .expect(&*("Next node not found ".to_owned() + &*step_edge.target));
-
-        next_node.graph_node.id.to_string()
+    pub fn has_next_node(&self) -> bool {
+        !self.next_node_queue.is_empty()
     }
 
     pub fn exec_current_node(&mut self) -> Result<(), AnyError> {
@@ -220,11 +247,6 @@ impl GraphExecutor {
             .insert(self.current_node.graph_node.id.clone(), out_data);
 
         Ok(())
-    }
-
-    pub fn set_next_node(&mut self) {
-        let next_node = self.get_next_node_id();
-        self.current_node = self.nodes.get(&next_node).unwrap().clone();
     }
 
     pub fn get_result(&mut self) -> Result<serde_json::Value, AnyError> {
