@@ -7,7 +7,7 @@ import { Binoculars, Pencil, Plus } from "lucide-react";
 import { Input } from "~/components/ui/input";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { fetchAllNodes, type NodeData, type NodeIndexData } from "~/lib/nodeModel";
+import { fetchAllNodes, type NodeIndexData } from "~/lib/nodeModel";
 
 export default function LibraryPage() {
 	const [nodes, setNodes] = useState<NodeIndexData[]>([]);
@@ -53,28 +53,32 @@ export default function LibraryPage() {
 								<TableCell>{node.inputs.length}</TableCell>
 								<TableCell>{node.outputs.length}</TableCell>
 								<TableCell className="text-right">
-									<div className="flex flex-row justify-end">
-										<Button variant="link" className="text-blue-500 hover:text-blue-700 !m-0 hover:border">
-											<TooltipProvider>
-												<Tooltip>
-													<TooltipTrigger><Pencil /></TooltipTrigger>
-													<TooltipContent>
-														<p>Edit</p>
-													</TooltipContent>
-												</Tooltip>
-											</TooltipProvider>
-										</Button>
-										<Button variant="link" className="text-blue-500 hover:text-blue-700 !m-0 hover:border">
-											<TooltipProvider>
-												<Tooltip>
-													<TooltipTrigger><Binoculars /></TooltipTrigger>
-													<TooltipContent>
-														<p>Inspect</p>
-													</TooltipContent>
-												</Tooltip>
-											</TooltipProvider>
-										</Button>
-									</div>
+									{!node.isInternal && (
+										<div className="flex flex-row justify-end">
+											<Button variant="link">
+												<Link to={`/node/edit/${node.id}`} className="text-blue-500 hover:text-blue-700 !m-0 hover:border">
+													<TooltipProvider>
+														<Tooltip>
+															<TooltipTrigger><Pencil /></TooltipTrigger>
+															<TooltipContent>
+																<p>Edit</p>
+															</TooltipContent>
+														</Tooltip>
+													</TooltipProvider>
+												</Link>
+											</Button>
+											<Button variant="link" className="text-blue-500 hover:text-blue-700 !m-0 hover:border">
+												<TooltipProvider>
+													<Tooltip>
+														<TooltipTrigger><Binoculars /></TooltipTrigger>
+														<TooltipContent>
+															<p>Inspect</p>
+														</TooltipContent>
+													</Tooltip>
+												</TooltipProvider>
+											</Button>
+										</div>
+									)}
 								</TableCell>
 							</TableRow>
 						))}
