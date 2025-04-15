@@ -49,6 +49,22 @@ export default function NodeEditPage({ params }: { params: any }) {
 		}
 	}
 
+	async function deleteCurrent() {
+		const result = await fetch(serverAddress + "/api/nodes/" + params.id, {
+			method: "DELETE",
+			headers: {
+				"Content-Type": "application/json",
+			},
+		});
+
+		if (result.ok) {
+			navigate("/library");
+			toast.success("Node deleted successfully!");
+		} else {
+			toast.error("Failed to delete node. Please try again.");
+		}
+	}
+
 	useEffect(() => {
 		fetch(serverAddress + "/api/nodes/" + params.id)
 			.then((response) => {
@@ -151,6 +167,7 @@ export default function NodeEditPage({ params }: { params: any }) {
 				<div className="flex flex-row space-x-4">
 					<Button onClick={submit}>Submit</Button>
 					<Button variant={"secondary"} onClick={() => navigate("/library")}>Cancel</Button>
+					<Button variant={"destructive"} onClick={deleteCurrent}>Delete</Button>
 				</div>
 			</div>
 		</FrameView>
