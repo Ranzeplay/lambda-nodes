@@ -1,35 +1,13 @@
-use crate::executor::local_object_to_json;
+use deno_core::_ops::RustToV8NoScope;
 use deno_core::v8;
-use deno_core::v8::{Global, HandleScope, Object};
-use serde::Deserialize;
+use deno_core::v8::{Global, HandleScope};
 
-#[derive(Deserialize, Clone, Debug)]
-pub struct LNBoolean {
-    pub value: bool,
-}
-
-pub fn bool_true<'a>(scope: &mut HandleScope) -> Global<Object> {
-    let obj = v8::Object::new(scope);
-    let key = v8::String::new(scope, "value").unwrap();
-    let value = v8::Boolean::new(scope, true);
-    obj.set(scope, key.into(), value.into()).unwrap();
-
-    println!(
-        "[bool_true] obj: {:?}",
-        local_object_to_json(scope, obj.clone())
-    );
+pub fn bool_true(scope: &mut HandleScope) -> Global<v8::Value> {
+    let obj = v8::Boolean::new(scope, true).to_v8();
     Global::new(scope, obj)
 }
 
-pub fn bool_false<'a>(scope: &mut HandleScope) -> Global<Object> {
-    let obj = v8::Object::new(scope);
-    let key = v8::String::new(scope, "value").unwrap();
-    let value = v8::Boolean::new(scope, false);
-    obj.set(scope, key.into(), value.into()).unwrap();
-
-    println!(
-        "[bool_false] obj: {:?}",
-        local_object_to_json(scope, obj.clone())
-    );
+pub fn bool_false(scope: &mut HandleScope) -> Global<v8::Value> {
+    let obj = v8::Boolean::new(scope, false).to_v8();
     Global::new(scope, obj)
 }

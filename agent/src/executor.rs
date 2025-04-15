@@ -1,11 +1,11 @@
-use crate::blocks::boolean::{bool_false, bool_true, LNBoolean};
+use crate::blocks::boolean::{bool_false, bool_true};
 use crate::db::flow::{Graph, GraphNode};
 use crate::db::get_node;
 use crate::db::models::Node;
 use deno_core::_ops::{RustToV8, RustToV8NoScope};
 use deno_core::error::AnyError;
 use deno_core::serde_v8::to_v8;
-use deno_core::v8::{ContextOptions, Function, Global, Local, Object, ObjectTemplate};
+use deno_core::v8::{ContextOptions, Function, Global, Local, ObjectTemplate};
 use deno_core::{serde_v8, v8, JsRuntime, RuntimeOptions};
 use std::collections::HashMap;
 use std::rc::Rc;
@@ -22,7 +22,7 @@ pub struct GraphExecutor {
     nodes: HashMap<String, CombinedNode>,
     graph: Graph,
     runtime: JsRuntime,
-    data_cache: HashMap<String, HashMap<String, Global<Object>>>,
+    data_cache: HashMap<String, HashMap<String, Global<v8::Value>>>,
     current_node: CombinedNode,
     entry_node_graph_id: String,
     end_node_graph_id: String,
@@ -90,7 +90,7 @@ impl GraphExecutor {
     pub fn init_entry(&mut self, init_value: serde_json::Value) -> Result<(), AnyError> {
         let scope = &mut self.runtime.handle_scope();
         let mut init_out = HashMap::new();
-        let global_obj = to_v8(scope, init_value)?.to_object(scope).unwrap();
+        let global_obj = to_v8(scope, init_value)?.to_v8();
         let global_obj = Global::new(scope, global_obj);
         init_out.insert("data".to_string(), global_obj);
         self.data_cache
@@ -156,10 +156,6 @@ impl GraphExecutor {
         self.next_node_queue = vec![];
     }
 
-    pub fn has_next_node(&self) -> bool {
-        !self.next_node_queue.is_empty()
-    }
-
     pub fn has_node(&self) -> bool {
         !self.current_node_queue.is_empty()
     }
@@ -205,9 +201,9 @@ impl GraphExecutor {
             if self.current_node.db_node.name == "Breaker" {
                 let condition = in_data.get("condition").unwrap().clone();
                 let condition = condition.to_v8(scope);
-                let condition = serde_v8::from_v8::<LNBoolean>(scope, condition)?;
+                let condition = serde_v8::from_v8::<bool>(scope, condition)?;
 
-                if !condition.value {
+                if !condition {
                     self.current_node_queue = self
                         .current_node_queue
                         .iter()
@@ -226,7 +222,7 @@ impl GraphExecutor {
                 self.data_cache
                     .insert(self.current_node.graph_node.id.clone(), out_data);
             } else if self.current_node.db_node.name == "Empty" {
-                let obj = Object::new(scope);
+                let obj = v8::undefined(scope).to_v8();
                 let obj = Global::new(scope, obj);
 
                 let mut out_data = HashMap::new();
@@ -290,7 +286,6 @@ impl GraphExecutor {
             .map(|out_item| {
                 let out_key = v8::String::new(scope, out_item.as_str()).unwrap();
                 let out_value = result.get(scope, out_key.into()).unwrap();
-                let out_value = out_value.to_object(scope).unwrap();
                 (out_item.clone(), Global::new(scope, out_value))
             })
             .collect::<HashMap<_, _>>();
