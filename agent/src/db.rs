@@ -162,14 +162,20 @@ pub async fn delete_log(client: &Client, id: i32) -> Result<bool> {
     Ok(rows_affected > 0)
 }
 
+pub async fn count_logs(client: &Client) -> Result<i64> {
+    let row = client
+        .query_one("SELECT COUNT(*) FROM logs", &[])
+        .await?;
+    Ok(row.get(0))
+}
+
 // Node operations
 pub async fn create_node(client: &Client, name: &str, content: &serde_json::Value) -> Result<Node> {
-    let id = Uuid::new_v4();
     let content_str = json_to_sql(content);
     let row = client
         .query_one(
-            "INSERT INTO nodes (id, name, content) VALUES ($1, $2, $3) RETURNING id, name, content",
-            &[&id, &name, &content_str],
+            "INSERT INTO nodes (name, content) VALUES ($1, $2) RETURNING id, name, content",
+            &[&name, &content_str],
         )
         .await?;
     Ok(row_to_node(row))
@@ -208,6 +214,23 @@ pub async fn delete_node(client: &Client, id: Uuid) -> Result<bool> {
     Ok(rows_affected > 0)
 }
 
+pub async fn list_nodes(client: &Client, limit: i64, offset: i64) -> Result<Vec<Node>> {
+    let rows = client
+        .query(
+            "SELECT id, name, content FROM nodes ORDER BY name ASC LIMIT $1 OFFSET $2",
+            &[&limit, &offset],
+        )
+        .await?;
+    Ok(rows.into_iter().map(row_to_node).collect())
+}
+
+pub async fn count_nodes(client: &Client) -> Result<i64> {
+    let row = client
+        .query_one("SELECT COUNT(*) FROM nodes", &[])
+        .await?;
+    Ok(row.get(0))
+}
+
 // Pipeline operations
 pub async fn create_pipeline(
     client: &Client,
@@ -216,12 +239,11 @@ pub async fn create_pipeline(
     method: HttpMethod,
     url: &str,
 ) -> Result<Pipeline> {
-    let id = Uuid::new_v4();
     let content_str = json_to_sql(content);
     let row = client
         .query_one(
-            "INSERT INTO pipelines (id, name, content, method, url) VALUES ($1, $2, $3, $4, $5) RETURNING id, name, content, method, url",
-            &[&id, &name, &content_str, &method, &url],
+            "INSERT INTO pipelines (name, content, method, url) VALUES ($1, $2, $3, $4) RETURNING id, name, content, method, url",
+            &[&name, &content_str, &method, &url],
         )
         .await?;
     Ok(row_to_pipeline(row))
@@ -260,6 +282,23 @@ pub async fn delete_pipeline(client: &Client, id: Uuid) -> Result<bool> {
         .execute("DELETE FROM pipelines WHERE id = $1", &[&id])
         .await?;
     Ok(rows_affected > 0)
+}
+
+pub async fn list_pipelines(client: &Client, limit: i64, offset: i64) -> Result<Vec<Pipeline>> {
+    let rows = client
+        .query(
+            "SELECT id, name, content, method, url FROM pipelines ORDER BY name ASC LIMIT $1 OFFSET $2",
+            &[&limit, &offset],
+        )
+        .await?;
+    Ok(rows.into_iter().map(row_to_pipeline).collect())
+}
+
+pub async fn count_pipelines(client: &Client) -> Result<i64> {
+    let row = client
+        .query_one("SELECT COUNT(*) FROM pipelines", &[])
+        .await?;
+    Ok(row.get(0))
 }
 
 // Helper functions to convert database rows to structs

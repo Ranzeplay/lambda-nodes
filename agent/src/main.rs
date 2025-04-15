@@ -1,12 +1,12 @@
-mod routes;
 mod db;
+mod routes;
 
+use actix_web::middleware::Logger;
 use actix_web::{web, App, HttpServer};
-use tokio_postgres::{NoTls, Config};
 use dotenvy::dotenv;
 use std::env;
 use std::sync::Arc;
-use actix_web::middleware::Logger;
+use tokio_postgres::{Config, NoTls};
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -16,15 +16,22 @@ async fn main() -> anyhow::Result<()> {
     // Database connection setup
     let mut cfg = Config::new();
     cfg.host(&env::var("DB_HOST").unwrap_or_else(|_| "localhost".to_string()))
-        .port(env::var("DB_PORT").unwrap_or_else(|_| "5432".to_string()).parse()?)
+        .port(
+            env::var("DB_PORT")
+                .unwrap_or_else(|_| "5432".to_string())
+                .parse()?,
+        )
         .dbname(&env::var("DB_NAME").unwrap_or_else(|_| "lambda-nodes".to_string()))
         .user(&env::var("DB_USER").unwrap_or_else(|_| "postgres".to_string()))
         .password(&env::var("DB_PASSWORD").unwrap_or_else(|_| "postgres".to_string()));
 
-    env_logger::init_from_env(env_logger::Env::new().default_filter_or("info"));
+    env_logger::init_from_env(
+        env_logger::Env::new()
+            .default_filter_or(env::var("LOG_LEVEL").unwrap_or_else(|_| "info".to_string())),
+    );
 
     let (client, connection) = cfg.connect(NoTls).await?;
-    
+
     // Spawn the connection handler
     tokio::spawn(async move {
         if let Err(e) = connection.await {
@@ -41,6 +48,7 @@ async fn main() -> anyhow::Result<()> {
             .app_data(web::Data::new(client.clone()))
             .configure(routes::configure)
     })
+    // .workers(1)
     .bind(("127.0.0.1", 3000))?
     .run()
     .await?;

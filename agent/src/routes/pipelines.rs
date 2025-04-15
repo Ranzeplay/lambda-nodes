@@ -1,8 +1,9 @@
-use actix_web::{web, HttpResponse, Responder};
+use actix_web::{web, HttpResponse, Responder, get, post, put, delete};
 use crate::db::HttpMethod;
 use serde::Deserialize;
 use tokio_postgres::Client;
 use uuid::Uuid;
+use std::sync::Arc;
 
 #[derive(Deserialize)]
 pub struct CreatePipelineRequest {
@@ -20,8 +21,15 @@ pub struct UpdatePipelineRequest {
     url: String,
 }
 
+#[derive(Deserialize)]
+pub struct ListPipelinesQuery {
+    limit: Option<i64>,
+    offset: Option<i64>,
+}
+
+#[post("")]
 pub async fn create_pipeline(
-    client: web::Data<Client>,
+    client: web::Data<Arc<Client>>,
     req: web::Json<CreatePipelineRequest>,
 ) -> impl Responder {
     match crate::db::create_pipeline(
@@ -36,8 +44,9 @@ pub async fn create_pipeline(
     }
 }
 
+#[get("/{id}")]
 pub async fn get_pipeline(
-    client: web::Data<Client>,
+    client: web::Data<Arc<Client>>,
     id: web::Path<Uuid>,
 ) -> impl Responder {
     match crate::db::get_pipeline(&client, id.into_inner()).await {
@@ -47,8 +56,9 @@ pub async fn get_pipeline(
     }
 }
 
+#[put("/{id}")]
 pub async fn update_pipeline(
-    client: web::Data<Client>,
+    client: web::Data<Arc<Client>>,
     id: web::Path<Uuid>,
     req: web::Json<UpdatePipelineRequest>,
 ) -> impl Responder {
@@ -66,8 +76,9 @@ pub async fn update_pipeline(
     }
 }
 
+#[delete("/{id}")]
 pub async fn delete_pipeline(
-    client: web::Data<Client>,
+    client: web::Data<Arc<Client>>,
     id: web::Path<Uuid>,
 ) -> impl Responder {
     match crate::db::delete_pipeline(&client, id.into_inner()).await {
@@ -77,12 +88,38 @@ pub async fn delete_pipeline(
     }
 }
 
+#[get("")]
+pub async fn list_pipelines(
+    client: web::Data<Arc<Client>>,
+    query: web::Query<ListPipelinesQuery>,
+) -> impl Responder {
+    let limit = query.limit.unwrap_or(10);
+    let offset = query.offset.unwrap_or(0);
+
+    match crate::db::list_pipelines(&client, limit, offset).await {
+        Ok(pipelines) => HttpResponse::Ok().json(pipelines),
+        Err(e) => HttpResponse::InternalServerError().body(e.to_string()),
+    }
+}
+
+#[get("/count")]
+pub async fn count_pipelines(
+    client: web::Data<Arc<Client>>,
+) -> impl Responder {
+    match crate::db::count_pipelines(&client).await {
+        Ok(count) => HttpResponse::Ok().json(count),
+        Err(e) => HttpResponse::InternalServerError().body(e.to_string()),
+    }
+}
+
 pub fn configure(cfg: &mut web::ServiceConfig) {
     cfg.service(
         web::scope("/pipelines")
-            .route("", web::post().to(create_pipeline))
-            .route("/{id}", web::get().to(get_pipeline))
-            .route("/{id}", web::put().to(update_pipeline))
-            .route("/{id}", web::delete().to(delete_pipeline))
+            .service(count_pipelines)
+            .service(create_pipeline)
+            .service(list_pipelines)
+            .service(get_pipeline)
+            .service(update_pipeline)
+            .service(delete_pipeline)
     );
 } 
