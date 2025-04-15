@@ -71,12 +71,12 @@ export default function NewNodePage() {
 						<div className="h-[56vh] border border-gray-300 grow">
 							<ReactFlowWrapper nodes={[node]} nodeTypes={nodeTypes} nodesConnectable={false} fitView />
 						</div>
-						<div className="flex flex-col space-y-2 grow">
+						<div className="flex flex-col space-y-2 w-96">
 							<div className="flex flex-col space-y-1.5">
 								<h3 className="text-lg font-bold">Input</h3>
 								{inputs.map((i, index) => (
-									<div className="flex flex-row space-x-2" key={index}>
-										<Input type="text" className="w-4/5" value={i} onChange={(n) => {
+									<div className="flex flex-row space-x-4" key={index}>
+										<Input type="text" className="grow" value={i} onChange={(n) => {
 											const newInput = [...inputs];
 											newInput[index] = n.target.value;
 											setInputs(newInput);
