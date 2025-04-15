@@ -27,14 +27,14 @@ export default function FlowNode({ data, isConnectable }: { data: NodeData, isCo
 							type="target"
 							position={Position.Left}
 							isConnectable={isConnectable}
-							className="!w-2.5 !h-2.5 !bg-white"
+							className="!w-2.5 !h-2.5 !bg-black"
 							id={`to-node`}
 						/>
 				<Handle
 							type="source"
 							position={Position.Right}
 							isConnectable={isConnectable}
-							className="!w-2.5 !h-2.5 !bg-white"
+							className="!w-2.5 !h-2.5 !bg-black"
 							id={`from-node`}
 						/>
 			</div>
@@ -49,7 +49,7 @@ export default function FlowNode({ data, isConnectable }: { data: NodeData, isCo
 							type="target"
 							position={Position.Left}
 							isConnectable={isConnectable}
-							className="!w-2.5 !h-2.5 !bg-black"
+							className="!w-2.5 !h-2.5 !bg-gray-600"
 							id={`input-${name}`}
 						/>
 					</div>
@@ -66,7 +66,7 @@ export default function FlowNode({ data, isConnectable }: { data: NodeData, isCo
 							type="source"
 							position={Position.Right}
 							isConnectable={isConnectable}
-							className="!w-2.5 !h-2.5 !bg-black"
+							className="!w-2.5 !h-2.5 !bg-gray-600"
 							id={`output-${name}`}
 						/>
 					</div>

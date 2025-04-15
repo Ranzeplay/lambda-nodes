@@ -45,47 +45,49 @@ export default function PipelinesPage() {
 					<TableBody>
 						{pipelines.map((pipeline) => (
 							<TableRow>
-							<TableCell className="font-medium">{pipeline.id}</TableCell>
-							<TableCell>{pipeline.name}</TableCell>
-							<TableCell>N/A</TableCell>
-							<TableCell>
-								<PipelineReadyState />
-							</TableCell>
-							<TableCell className="text-right">
-								<div className="flex flex-row justify-end">
-									<Button variant="link" className="text-blue-500 hover:text-blue-700 !m-0 hover:border">
-										<TooltipProvider>
-											<Tooltip>
-												<TooltipTrigger><Pencil /></TooltipTrigger>
-												<TooltipContent>
-													<p>Edit</p>
-												</TooltipContent>
-											</Tooltip>
-										</TooltipProvider>
-									</Button>
-									<Button variant="link" className="text-blue-500 hover:text-blue-700 !m-0 hover:border">
-										<TooltipProvider>
-											<Tooltip>
-												<TooltipTrigger><Binoculars /></TooltipTrigger>
-												<TooltipContent>
-													<p>Inspect</p>
-												</TooltipContent>
-											</Tooltip>
-										</TooltipProvider>
-									</Button>
-									<Button variant="link" className="text-blue-500 hover:text-blue-700 !m-0 hover:border">
-										<TooltipProvider>
-											<Tooltip>
-												<TooltipTrigger><Rocket /></TooltipTrigger>
-												<TooltipContent>
-													<p>Manual Run</p>
-												</TooltipContent>
-											</Tooltip>
-										</TooltipProvider>
-									</Button>
-								</div>
-							</TableCell>
-						</TableRow>
+								<TableCell className="font-medium">{pipeline.id}</TableCell>
+								<TableCell>{pipeline.name}</TableCell>
+								<TableCell>N/A</TableCell>
+								<TableCell>
+									<PipelineReadyState />
+								</TableCell>
+								<TableCell className="text-right">
+									<div className="flex flex-row justify-end">
+										<Button variant="link" className="text-blue-500 hover:text-blue-700 !m-0 hover:border">
+											<Link to={`/pipeline/edit/${pipeline.id}`}>
+												<TooltipProvider>
+													<Tooltip>
+														<TooltipTrigger><Pencil /></TooltipTrigger>
+														<TooltipContent>
+															<p>Edit</p>
+														</TooltipContent>
+													</Tooltip>
+												</TooltipProvider>
+											</Link>
+										</Button>
+										<Button variant="link" className="text-blue-500 hover:text-blue-700 !m-0 hover:border">
+											<TooltipProvider>
+												<Tooltip>
+													<TooltipTrigger><Binoculars /></TooltipTrigger>
+													<TooltipContent>
+														<p>Inspect</p>
+													</TooltipContent>
+												</Tooltip>
+											</TooltipProvider>
+										</Button>
+										<Button variant="link" className="text-blue-500 hover:text-blue-700 !m-0 hover:border">
+											<TooltipProvider>
+												<Tooltip>
+													<TooltipTrigger><Rocket /></TooltipTrigger>
+													<TooltipContent>
+														<p>Manual Run</p>
+													</TooltipContent>
+												</Tooltip>
+											</TooltipProvider>
+										</Button>
+									</div>
+								</TableCell>
+							</TableRow>
 						))}
 					</TableBody>
 				</Table>

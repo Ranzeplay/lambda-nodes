@@ -17,7 +17,7 @@ import { serverAddress } from "~/lib/env";
 
 const nodeTypes = { flowNode: FlowNode };
 
-export default function NewPipelinePage() {
+export default function PipelineEditPage({ params }: { params: any }) {
 	const [name, setName] = useState("");
 	const [method, setMethod] = useState("GET");
 	const [route, setRoute] = useState("");
@@ -67,8 +67,8 @@ export default function NewPipelinePage() {
 	}
 
 	async function submit() {
-		const result = await fetch(serverAddress + "/api/pipelines", {
-			method: "POST",
+		const result = await fetch(serverAddress + "/api/pipelines/" + params.id, {
+			method: "PUT",
 			headers: {
 				"Content-Type": "application/json",
 			},
@@ -90,6 +90,28 @@ export default function NewPipelinePage() {
 			toast.error("Failed to create pipeline. Please try again.");
 		}
 	}
+
+	useEffect(() => {
+		fetch(serverAddress + "/api/pipelines/" + params.id)
+			.then((response) => {
+				if (response.ok) {
+					return response.json();
+				} else {
+					throw new Error("Failed to fetch pipeline data");
+				}
+			})
+			.then((data) => {
+				setName(data.name);
+				setMethod(data.method);
+				setRoute(data.url);
+				setNodes(data.content.nodes);
+				setEdges(data.content.edges);
+			})
+			.catch((error) => {
+				toast.error("Failed to fetch pipeline data. Please try again.");
+				console.error("Error fetching pipeline data:", error);
+			});
+	}, []);
 
 	const navigate = useNavigate();
 
@@ -136,7 +158,7 @@ export default function NewPipelinePage() {
 				<div className="space-y-1.5">
 					<h2 className="font-bold text-xl">HTTP Route</h2>
 					<div className="flex flex-row space-x-4">
-						<Select value={method} onValueChange={setMethod}>
+						<Select value={method} onValueChange={(n) => setMethod(n)}>
 							<SelectTrigger className="w-[210px]">
 								<SelectValue placeholder="Select a HTTP method" />
 							</SelectTrigger>
