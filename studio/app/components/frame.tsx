@@ -1,4 +1,4 @@
-import { Settings, LayoutDashboard, Code, Logs, CirclePlay, History } from "lucide-react";
+import { Settings, LayoutDashboard, Code, Logs, CirclePlay, History, Route } from "lucide-react";
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider } from "./ui/sidebar";
 
 const items = [
@@ -16,6 +16,11 @@ const items = [
 		title: "Pipelines",
 		url: "/pipelines",
 		icon: CirclePlay,
+	},
+	{
+		title: "Routes",
+		url: "/routes",
+		icon: Route,
 	},
 	{
 		title: "History",
