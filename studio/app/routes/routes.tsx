@@ -51,7 +51,12 @@ export default function RoutesPage() {
 								<TableCell className="font-medium">{route.id}</TableCell>
 								<TableCell>{route.pipelineId}</TableCell>
 								<TableCell>{route.method}</TableCell>
-								<TableCell>{route.path}</TableCell>
+								<TableCell>
+									<div className="flex flex-row items-center grow *:font-mono">
+										<p className="text-gray-400">/exec/</p>
+										<p>{route.path}</p>
+									</div>
+								</TableCell>
 								<TableCell className="text-right">
 									<Button variant="link" className="text-red-500 hover:text-red-700 hover:underline *:cursor-pointer" onClick={() => deleteRoute(route.id)}>
 										Delete
