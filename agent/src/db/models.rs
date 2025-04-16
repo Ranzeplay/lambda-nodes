@@ -79,8 +79,6 @@ pub struct Pipeline {
     pub id: Uuid,
     pub name: String,
     pub content: serde_json::Value,
-    pub method: HttpMethod,
-    pub url: String,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -93,4 +91,13 @@ pub struct History {
     pub end_at: Option<DateTime<Utc>>,
     pub error: Option<String>,
     pub result: Option<serde_json::Value>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct Route {
+    pub id: Uuid,
+    pub pipeline_id: Uuid,
+    pub path: String,
+    pub method: HttpMethod,
 }

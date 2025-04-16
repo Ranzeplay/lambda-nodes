@@ -9,8 +9,6 @@ use uuid::Uuid;
 pub struct CreatePipelineRequest {
     name: String,
     content: serde_json::Value,
-    method: String,
-    url: String,
 }
 
 #[derive(Deserialize)]
@@ -18,8 +16,6 @@ pub struct CreatePipelineRequest {
 pub struct UpdatePipelineRequest {
     name: String,
     content: serde_json::Value,
-    method: String,
-    url: String,
 }
 
 #[derive(Deserialize)]
@@ -38,8 +34,6 @@ pub async fn create_pipeline(
         &client,
         &req.name,
         &req.content,
-        req.method.clone(),
-        &req.url,
     )
         .await
     {
@@ -68,8 +62,6 @@ pub async fn update_pipeline(
         id.into_inner(),
         &req.name,
         &req.content,
-        req.method.clone(),
-        &req.url,
     )
         .await
     {

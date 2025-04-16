@@ -5,9 +5,9 @@ CREATE TYPE log_level AS ENUM ('info', 'warn', 'error');
 CREATE TABLE IF NOT EXISTS logs
 (
     id        SERIAL PRIMARY KEY,
-    level     log_level NOT NULL,
-    category  TEXT      NOT NULL,
-    message   TEXT      NOT NULL,
+    level     log_level                NOT NULL,
+    category  TEXT                     NOT NULL,
+    message   TEXT                     NOT NULL,
     create_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
 );
 
@@ -29,12 +29,8 @@ CREATE TABLE IF NOT EXISTS pipelines
 (
     id      UUID NOT NULL PRIMARY KEY DEFAULT gen_random_uuid(),
     name    TEXT NOT NULL,
-    content JSON NOT NULL,
-    method  TEXT NOT NULL,
-    url     TEXT NOT NULL
+    content JSON NOT NULL
 );
-
-CREATE INDEX IF NOT EXISTS idx_pipelines_url ON pipelines (url);
 
 CREATE TABLE IF NOT EXISTS history
 (
@@ -48,5 +44,21 @@ CREATE TABLE IF NOT EXISTS history
 );
 
 CREATE INDEX IF NOT EXISTS idx_history_pipeline_id ON history (pipeline_id);
+
+CREATE TABLE IF NOT EXISTS routes
+(
+    id          UUID PRIMARY KEY NOT NULL DEFAULT gen_random_uuid(),
+    pipeline_id UUID             NOT NULL,
+    path        TEXT             NOT NULL,
+    method      TEXT             NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS cron_jobs
+(
+    id          UUID PRIMARY KEY NOT NULL DEFAULT gen_random_uuid(),
+    pipeline_id UUID             NOT NULL,
+    expr        TEXT             NOT NULL,
+    input_data  JSON             NOT NULL
+);
 
 COMMIT;

@@ -1,4 +1,4 @@
-use crate::db::models::{HttpMethod, Pipeline};
+use crate::db::models::Pipeline;
 use crate::db::utils::row_to_pipeline;
 use anyhow::Result;
 use tokio_postgres::Client;
@@ -8,13 +8,11 @@ pub async fn create_pipeline(
     client: &Client,
     name: &str,
     content: &serde_json::Value,
-    method: HttpMethod,
-    url: &str,
 ) -> Result<Pipeline> {
     let row = client
         .query_one(
-            "INSERT INTO pipelines (name, content, method, url) VALUES ($1, $2, $3, $4) RETURNING id, name, content, method, url",
-            &[&name, &content, &method, &url],
+            "INSERT INTO pipelines (name, content) VALUES ($1, $2) RETURNING id, name, content",
+            &[&name, &content],
         )
         .await?;
     Ok(row_to_pipeline(row))
@@ -23,7 +21,7 @@ pub async fn create_pipeline(
 pub async fn get_pipeline(client: &Client, id: Uuid) -> Result<Option<Pipeline>> {
     let row = client
         .query_opt(
-            "SELECT id, name, content, method, url FROM pipelines WHERE id = $1",
+            "SELECT id, name, content FROM pipelines WHERE id = $1",
             &[&id],
         )
         .await?;
@@ -35,13 +33,11 @@ pub async fn update_pipeline(
     id: Uuid,
     name: &str,
     content: &serde_json::Value,
-    method: HttpMethod,
-    url: &str,
 ) -> Result<Option<Pipeline>> {
     let row = client
         .query_opt(
-            "UPDATE pipelines SET name = $2, content = $3, method = $4, url = $5 WHERE id = $1 RETURNING id, name, content, method, url",
-            &[&id, &name, &content, &method, &url],
+            "UPDATE pipelines SET name = $2, content = $3 WHERE id = $1 RETURNING id, name, content",
+            &[&id, &name, &content],
         )
         .await?;
     Ok(row.map(row_to_pipeline))
@@ -57,7 +53,7 @@ pub async fn delete_pipeline(client: &Client, id: Uuid) -> Result<bool> {
 pub async fn list_pipelines(client: &Client, limit: i64, offset: i64) -> Result<Vec<Pipeline>> {
     let rows = client
         .query(
-            "SELECT id, name, content, method, url FROM pipelines ORDER BY name ASC LIMIT $1 OFFSET $2",
+            "SELECT id, name, content FROM pipelines ORDER BY name ASC LIMIT $1 OFFSET $2",
             &[&limit, &offset],
         )
         .await?;

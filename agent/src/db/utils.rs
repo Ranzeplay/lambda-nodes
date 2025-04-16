@@ -1,4 +1,4 @@
-use crate::db::models::{History, Log, Node, Pipeline};
+use crate::db::models::{History, Log, Node, Pipeline, Route};
 use tokio_postgres::Row;
 
 // Helper functions to convert database rows to structs
@@ -28,8 +28,6 @@ pub fn row_to_pipeline(row: Row) -> Pipeline {
         id: row.get(0),
         name: row.get(1),
         content: row.get(2),
-        method: row.get(3),
-        url: row.get(4),
     }
 }
 
@@ -42,5 +40,14 @@ pub fn row_to_history(row: Row) -> History {
         end_at: row.get("end_at"),
         error: row.get("error"),
         result: row.get("result"),
+    }
+}
+
+pub fn row_to_route(row: Row) -> Route {
+    Route {
+        id: row.get("id"),
+        pipeline_id: row.get("pipeline_id"),
+        path: row.get("path"),
+        method: row.get("method"),
     }
 }
