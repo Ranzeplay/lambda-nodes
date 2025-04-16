@@ -10,8 +10,8 @@ The Agent is the backend service for Lambda Nodes, responsible for managing pipe
 
 ## Requirements
 
-- Rust (>= 1.70)
-- PostgreSQL (>= 13.x)
+- Rust
+- PostgreSQL
 
 ## Environment Variables
 
@@ -50,11 +50,3 @@ The following environment variables are required to run the Agent:
    ```
 
 2. Deploy the binary to your server.
-
-## Contributing
-
-Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
-
-## License
-
-This project is licensed under the MIT License. See the [LICENSE](../LICENSE) file for details.
