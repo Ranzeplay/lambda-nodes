@@ -3,6 +3,7 @@ use crate::executor::GraphExecutor;
 use actix_web::{route, web, HttpRequest, HttpResponse, Responder};
 use serde_json::Value;
 use std::sync::Arc;
+use log::{info, warn};
 use tokio_postgres::Client;
 
 #[route(
@@ -21,22 +22,27 @@ pub async fn exec(
 ) -> impl Responder {
     let tail = path.into_inner();
 
-    let pipeline_graph_result = client
+    let pipeline_result = client
         .query_one(
-            "SELECT content FROM pipelines WHERE url = $1 AND method = $2 LIMIT 1",
+            "SELECT name, content FROM pipelines WHERE url = $1 AND method = $2 LIMIT 1",
             &[&tail, &req.method().as_str()],
         )
         .await;
 
-    if let Err(e) = pipeline_graph_result {
+    if let Err(e) = pipeline_result {
         return HttpResponse::NotFound().body(format!("{:?}", e));
     }
-
-    let pipeline_graph_item = pipeline_graph_result.unwrap().get(0);
+    
+    let pipeline_graph_result = pipeline_result.unwrap();
+    let pipeline_name: String = pipeline_graph_result.get(0);
+    let pipeline_graph_item = pipeline_graph_result.get(1);
     let pipeline_graph: Graph = serde_json::from_value(pipeline_graph_item).unwrap();
+    
+    info!("Initializing GraphExecutor for pipeline graph: {}", pipeline_name);
 
     let mut executor = GraphExecutor::new(pipeline_graph, &client).await.unwrap();
     if let Err(_) = executor.init_entry(json.into_inner()) {
+        warn!("Failed to initialize GraphExecutor for pipeline graph: {}", pipeline_name);
         return HttpResponse::InternalServerError().body("Failed to initialize pipeline entry");
     }
 
@@ -44,6 +50,7 @@ pub async fn exec(
 
     while !executor.reached_end {
         if let Err(_) = executor.exec_current_queue() {
+            warn!("Failed to execute current queue for pipeline graph: {}", pipeline_name);
             return HttpResponse::InternalServerError().body("Failed to execute current queue");
         }
 
@@ -53,6 +60,7 @@ pub async fn exec(
 
     let result = executor.get_result();
     if result.is_err() {
+        warn!("Failed to get execution result for pipeline graph: {}", pipeline_name);
         return HttpResponse::InternalServerError().body("Failed to get execution result");
     }
 

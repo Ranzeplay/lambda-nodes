@@ -5,9 +5,10 @@ use crate::db::models::Node;
 use deno_core::_ops::{RustToV8, RustToV8NoScope};
 use deno_core::error::AnyError;
 use deno_core::serde_v8::to_v8;
-use deno_core::v8::{ContextOptions, Function, Global, Local, ObjectTemplate};
+use deno_core::v8::{ContextOptions, Function, Global, HandleScope, Local, ObjectTemplate};
 use deno_core::{serde_v8, v8, JsRuntime, RuntimeOptions};
 use std::collections::HashMap;
+use std::fmt;
 use std::rc::Rc;
 use tokio_postgres::Client;
 use uuid::Uuid;
@@ -156,10 +157,6 @@ impl GraphExecutor {
         self.next_node_queue = vec![];
     }
 
-    pub fn has_node(&self) -> bool {
-        !self.current_node_queue.is_empty()
-    }
-
     pub fn exec_current_node(&mut self) -> Result<(), AnyError> {
         let isolated = self.runtime.v8_isolate();
         let handle_scope = &mut v8::HandleScope::new(isolated);
@@ -198,45 +195,15 @@ impl GraphExecutor {
             .collect::<HashMap<_, _>>();
 
         if self.current_node.db_node.is_internal {
-            if self.current_node.db_node.name == "Breaker" {
-                let condition = in_data.get("condition").unwrap().clone();
-                let condition = condition.to_v8(scope);
-                let condition = serde_v8::from_v8::<bool>(scope, condition)?;
-
-                if !condition {
-                    self.current_node_queue = self
-                        .current_node_queue
-                        .iter()
-                        .filter(|node| node.graph_node.id != self.current_node.graph_node.id)
-                        .cloned()
-                        .collect();
-                }
-            } else if self.current_node.db_node.name == "True" {
-                let mut out_data = HashMap::new();
-                out_data.insert("out".to_string(), bool_true(scope));
-                self.data_cache
-                    .insert(self.current_node.graph_node.id.clone(), out_data);
-            } else if self.current_node.db_node.name == "False" {
-                let mut out_data = HashMap::new();
-                out_data.insert("out".to_string(), bool_false(scope));
-                self.data_cache
-                    .insert(self.current_node.graph_node.id.clone(), out_data);
-            } else if self.current_node.db_node.name == "Empty" {
-                let obj = v8::undefined(scope).to_v8();
-                let obj = Global::new(scope, obj);
-
-                let mut out_data = HashMap::new();
-                out_data.insert("out".to_string(), obj);
-                self.data_cache
-                    .insert(self.current_node.graph_node.id.clone(), out_data);
-            } else if self.current_node.db_node.name == "EndRequest" {
-                self.reached_end = true;
-                self.end_node_graph_id = self.current_node.graph_node.id.clone();
-                self.data_cache
-                    .insert(self.current_node.graph_node.id.clone(), in_data);
-            }
-
-            return Ok(());
+            return process_internal_nodes(
+                &self.current_node,
+                &mut self.current_node_queue,
+                &mut self.data_cache,
+                &mut self.reached_end,
+                &mut self.end_node_graph_id,
+                in_data,
+                scope,
+            );
         }
 
         // Build the input object for the current node
@@ -313,6 +280,54 @@ impl GraphExecutor {
     }
 }
 
+fn process_internal_nodes(
+    current_node: &CombinedNode,
+    current_node_queue: &mut Vec<CombinedNode>,
+    data_cache: &mut HashMap<String, HashMap<String, Global<v8::Value>>>,
+    reached_end: &mut bool,
+    end_node_graph_id: &mut String,
+    in_data: HashMap<String, Global<v8::Value>>,
+    scope: &mut HandleScope,
+) -> Result<(), AnyError> {
+    if current_node.db_node.name == "Breaker" {
+        let condition = in_data.get("condition").unwrap().clone();
+        let condition = condition.to_v8(scope);
+        let condition = serde_v8::from_v8::<bool>(scope, condition)?;
+
+        if !condition {
+            *current_node_queue = current_node_queue
+                .iter()
+                .filter(|node| node.graph_node.id != current_node.graph_node.id)
+                .cloned()
+                .collect();
+        }
+    } else if current_node.db_node.name == "True" {
+        let mut out_data = HashMap::new();
+        out_data.insert("out".to_string(), bool_true(scope));
+        data_cache.insert(current_node.graph_node.id.clone(), out_data);
+    } else if current_node.db_node.name == "False" {
+        let mut out_data = HashMap::new();
+        out_data.insert("out".to_string(), bool_false(scope));
+        data_cache.insert(current_node.graph_node.id.clone(), out_data);
+    } else if current_node.db_node.name == "Empty" {
+        let obj = v8::undefined(scope).to_v8();
+        let obj = Global::new(scope, obj);
+
+        let mut out_data = HashMap::new();
+        out_data.insert("out".to_string(), obj);
+        data_cache.insert(current_node.graph_node.id.clone(), out_data);
+    } else if current_node.db_node.name == "EndRequest" {
+        *reached_end = true;
+        *end_node_graph_id = current_node.graph_node.id.clone();
+        data_cache.insert(current_node.graph_node.id.clone(), in_data);
+    } else {
+        let err = fmt::Error {};
+        return Err(AnyError::new(err).context("Internal node not found"));
+    }
+    
+    Ok(())
+}
+
 fn get_combined_nodes(graph: Graph, db_nodes: Vec<Node>) -> HashMap<String, CombinedNode> {
     let mut combined_nodes = HashMap::new();
 
@@ -333,6 +348,7 @@ fn get_combined_nodes(graph: Graph, db_nodes: Vec<Node>) -> HashMap<String, Comb
     combined_nodes
 }
 
+#[allow(dead_code)]
 fn value_to_json(
     scope: &mut v8::HandleScope,
     value: Local<v8::Value>,
@@ -346,6 +362,7 @@ fn value_to_json(
     Ok(json_string)
 }
 
+#[allow(dead_code)]
 pub fn local_object_to_json(
     scope: &mut v8::HandleScope,
     value: Local<v8::Object>,
@@ -360,6 +377,7 @@ pub fn local_object_to_json(
     Ok(json_string)
 }
 
+#[allow(dead_code)]
 pub fn global_object_to_json(
     scope: &mut v8::HandleScope,
     value: Global<v8::Object>,
