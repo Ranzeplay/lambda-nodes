@@ -4,15 +4,15 @@ mod executor;
 mod routes;
 mod middlewares;
 
+use crate::middlewares::db_logging::DbLogger;
 use actix_cors::Cors;
 use actix_web::middleware::Logger;
 use actix_web::{web, App, HttpServer};
 use dotenvy::dotenv;
+use log::{error, info};
 use std::env;
 use std::sync::Arc;
-use log::{error, info};
 use tokio_postgres::{Config, NoTls};
-use crate::middlewares::db_logging::DbLogger;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -52,7 +52,6 @@ async fn main() -> anyhow::Result<()> {
             error!("database connection error: {}", e);
         }
     });
-
     let client = Arc::new(client);
 
     // Start HTTP server

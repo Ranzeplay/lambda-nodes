@@ -2,9 +2,9 @@ use crate::db::{create_log, LogLevel};
 use actix_web::dev::{Service, Transform};
 use actix_web::{dev::ServiceRequest, dev::ServiceResponse, Error};
 use futures_util::future::{ok, LocalBoxFuture, Ready};
+use log::error;
 use std::ops::Deref;
 use std::sync::Arc;
-use log::error;
 use tokio_postgres::Client;
 
 pub struct DbLogger {

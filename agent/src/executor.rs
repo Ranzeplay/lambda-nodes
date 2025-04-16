@@ -8,7 +8,6 @@ use deno_core::serde_v8::to_v8;
 use deno_core::v8::{ContextOptions, Function, Global, HandleScope, Local, ObjectTemplate};
 use deno_core::{serde_v8, v8, JsRuntime, RuntimeOptions};
 use std::collections::HashMap;
-use std::fmt;
 use std::rc::Rc;
 use tokio_postgres::Client;
 use uuid::Uuid;
@@ -267,14 +266,17 @@ impl GraphExecutor {
     pub fn get_result(&mut self) -> Result<serde_json::Value, AnyError> {
         let scope = &mut self.runtime.handle_scope();
 
-        let final_result = self
-            .data_cache
-            .get(&self.end_node_graph_id)
-            .unwrap()
-            .get("data")
-            .unwrap()
-            .clone()
-            .to_v8(scope);
+        let final_result = self.data_cache.get(&self.end_node_graph_id);
+        if final_result.is_none() {
+            return Err(AnyError::msg("End node not found"));
+        }
+
+        let final_result = final_result.unwrap().get("data");
+        if final_result.is_none() {
+            return Err(AnyError::msg("End node data not found"));
+        }
+
+        let final_result = final_result.unwrap().clone().to_v8(scope);
         let result = serde_v8::from_v8::<serde_json::Value>(scope, final_result)?;
         Ok(result)
     }
@@ -321,10 +323,9 @@ fn process_internal_nodes(
         *end_node_graph_id = current_node.graph_node.id.clone();
         data_cache.insert(current_node.graph_node.id.clone(), in_data);
     } else {
-        let err = fmt::Error {};
-        return Err(AnyError::new(err).context("Internal node not found"));
+        return Err(AnyError::msg("Internal node not found"));
     }
-    
+
     Ok(())
 }
 

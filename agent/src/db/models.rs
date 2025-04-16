@@ -82,3 +82,15 @@ pub struct Pipeline {
     pub method: HttpMethod,
     pub url: String,
 }
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct History {
+    pub id: Uuid,
+    pub pipeline_id: Uuid,
+    pub status: String,
+    pub start_at: DateTime<Utc>,
+    pub end_at: Option<DateTime<Utc>>,
+    pub error: Option<String>,
+    pub result: Option<serde_json::Value>,
+}

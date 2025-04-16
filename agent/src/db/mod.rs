@@ -4,6 +4,7 @@ pub mod models;
 pub mod nodes;
 pub mod pipelines;
 pub mod utils;
+pub mod history;
 
 pub use logs::*;
 pub use models::LogLevel;
