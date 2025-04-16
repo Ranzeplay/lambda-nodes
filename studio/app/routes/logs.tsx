@@ -33,14 +33,28 @@ export default function LogsPage() {
 						</TableRow>
 					</TableHeader>
 					<TableBody>
-						{logs.map((log) => (
-							<TableRow key={log.id}>
-								<TableCell className="text-xs">{new Date(log.createAt).toLocaleString()}</TableCell>
-								<TableCell className={`text-xs ${log.category == "info" && "text-blue-500"} ${log.category == "warn" && "text-yellow-600"} ${log.category == "error" && "text-red-500"}`}>{log.level}</TableCell>
-								<TableCell className="text-xs">{log.category}</TableCell>
-								<TableCell className="text-xs">{log.message}</TableCell>
-							</TableRow>
-						))}
+						{logs.map((log) => {
+							let color = `text-black`;
+							if (log.level === "info") {
+								color = "text-blue-500";
+							} else if (log.level === "warn") {
+								color = "text-yellow-600";
+							} else if (log.level === "error") {
+								color = "text-red-500";
+							}
+							const level = log.level.charAt(0).toUpperCase() + log.level.slice(1);
+
+							return (
+								(
+									<TableRow key={log.id}>
+										<TableCell className="text-xs">{new Date(log.createAt).toLocaleString()}</TableCell>
+										<TableCell className={`text-xs ${color}`}>{level}</TableCell>
+										<TableCell className="text-xs">{log.category}</TableCell>
+										<TableCell className="text-xs">{log.message}</TableCell>
+									</TableRow>
+								)
+							)
+						})}
 					</TableBody>
 				</Table>
 			</div>
