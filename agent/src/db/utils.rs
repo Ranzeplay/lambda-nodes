@@ -6,8 +6,9 @@ pub fn row_to_log(row: Row) -> Log {
     Log {
         id: row.get(0),
         level: row.get(1),
-        message: row.get(2),
-        create_at: row.get(3),
+        category: row.get(2),
+        message: row.get(3),
+        create_at: row.get(4),
     }
 }
 

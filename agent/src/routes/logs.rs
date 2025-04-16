@@ -1,30 +1,12 @@
-use crate::db::LogLevel;
-use actix_web::{delete, get, post, web, HttpResponse, Responder};
+use actix_web::{delete, get, web, HttpResponse, Responder};
 use serde::Deserialize;
 use std::sync::Arc;
 use tokio_postgres::Client;
 
 #[derive(Deserialize)]
-pub struct CreateLogRequest {
-    level: LogLevel,
-    message: String,
-}
-
-#[derive(Deserialize)]
 pub struct ListLogsQuery {
     limit: Option<i64>,
     offset: Option<i64>,
-}
-
-#[post("")]
-pub async fn create_log(
-    client: web::Data<Arc<Client>>,
-    req: web::Json<CreateLogRequest>,
-) -> impl Responder {
-    match crate::db::create_log(&client, req.level.clone(), &req.message).await {
-        Ok(log) => HttpResponse::Created().json(log),
-        Err(e) => HttpResponse::InternalServerError().body(e.to_string()),
-    }
 }
 
 #[get("/{id}")]
@@ -41,7 +23,7 @@ pub async fn list_logs(
     client: web::Data<Arc<Client>>,
     query: web::Query<ListLogsQuery>,
 ) -> impl Responder {
-    let limit = query.limit.unwrap_or(10);
+    let limit = query.limit.unwrap_or(30);
     let offset = query.offset.unwrap_or(0);
 
     match crate::db::list_logs(&client, limit, offset).await {
@@ -71,7 +53,6 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
     cfg.service(
         web::scope("/logs")
             .service(count_logs)
-            .service(create_log)
             .service(list_logs)
             .service(get_log)
             .service(delete_log),

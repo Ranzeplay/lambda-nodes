@@ -235,6 +235,7 @@ dependencies = [
  "deno_web",
  "dotenvy",
  "env_logger",
+ "futures-util",
  "log",
  "memory-cache-rs",
  "postgres-types",

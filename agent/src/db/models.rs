@@ -29,7 +29,7 @@ impl<'a> ToSql for LogLevel {
     }
 
     fn accepts(ty: &Type) -> bool {
-        ty == &Type::VARCHAR
+        ty == &Type::VARCHAR || ty.name() == "log_level"
     }
 
     to_sql_checked!();
@@ -47,7 +47,7 @@ impl<'a> FromSql<'a> for LogLevel {
     }
 
     fn accepts(ty: &Type) -> bool {
-        ty == &Type::VARCHAR
+        ty == &Type::VARCHAR || ty == &Type::TEXT || ty.name() == "log_level"
     }
 }
 
@@ -56,6 +56,7 @@ impl<'a> FromSql<'a> for LogLevel {
 pub struct Log {
     pub id: i32,
     pub level: LogLevel,
+    pub category: String,
     pub message: String,
     pub create_at: DateTime<Utc>,
 }

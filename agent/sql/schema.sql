@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS logs
 (
     id        SERIAL PRIMARY KEY,
     level     log_level                NOT NULL,
+    category  TEXT                     NOT NULL,
     message   TEXT                     NOT NULL,
     create_at TIMESTAMP WITH TIME ZONE not null default now()
 );

@@ -2,6 +2,7 @@ pub(crate) mod blocks;
 mod db;
 mod executor;
 mod routes;
+mod middlewares;
 
 use actix_cors::Cors;
 use actix_web::middleware::Logger;
@@ -9,7 +10,9 @@ use actix_web::{web, App, HttpServer};
 use dotenvy::dotenv;
 use std::env;
 use std::sync::Arc;
+use log::{error, info};
 use tokio_postgres::{Config, NoTls};
+use crate::middlewares::db_logging::DbLogger;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -32,13 +35,21 @@ async fn main() -> anyhow::Result<()> {
         env_logger::Env::new()
             .default_filter_or(env::var("LOG_LEVEL").unwrap_or_else(|_| "info".to_string())),
     );
+    info!("Initialized logger");
 
-    let (client, connection) = cfg.connect(NoTls).await?;
+    let client = cfg.connect(NoTls).await;
+    let (client, connection) = match client {
+        Ok(client) => client,
+        Err(e) => {
+            error!("Failed to connect to the database: {}", e);
+            return Err(anyhow::anyhow!("Database connection error"));
+        }
+    };
 
     // Spawn the connection handler
     tokio::spawn(async move {
         if let Err(e) = connection.await {
-            eprintln!("database connection error: {}", e);
+            error!("database connection error: {}", e);
         }
     });
 
@@ -55,6 +66,9 @@ async fn main() -> anyhow::Result<()> {
                     .allow_any_header()
                     .max_age(3600),
             )
+            .wrap(DbLogger {
+                client: client.clone(),
+            })
             .app_data(web::Data::new(client.clone()))
             .configure(routes::configure)
     })
@@ -65,3 +79,4 @@ async fn main() -> anyhow::Result<()> {
 
     Ok(())
 }
+

@@ -5,6 +5,7 @@ use serde_json::Value;
 use std::sync::Arc;
 use log::{info, warn};
 use tokio_postgres::Client;
+use crate::db::{create_log, LogLevel};
 
 #[route(
     "/exec/{tail:.*}",
@@ -39,10 +40,13 @@ pub async fn exec(
     let pipeline_graph: Graph = serde_json::from_value(pipeline_graph_item).unwrap();
     
     info!("Initializing GraphExecutor for pipeline graph: {}", pipeline_name);
+    create_log(&client, LogLevel::Info, "Execution", &format!("Initializing GraphExecutor for pipeline graph: {}", pipeline_name)).await.unwrap();
 
     let mut executor = GraphExecutor::new(pipeline_graph, &client).await.unwrap();
     if let Err(_) = executor.init_entry(json.into_inner()) {
         warn!("Failed to initialize GraphExecutor for pipeline graph: {}", pipeline_name);
+        
+        create_log(&client, LogLevel::Error, "Execution", &format!("Failed to initialize GraphExecutor for pipeline graph: {}", pipeline_name)).await.unwrap();
         return HttpResponse::InternalServerError().body("Failed to initialize pipeline entry");
     }
 
@@ -51,6 +55,8 @@ pub async fn exec(
     while !executor.reached_end {
         if let Err(_) = executor.exec_current_queue() {
             warn!("Failed to execute current queue for pipeline graph: {}", pipeline_name);
+            create_log(&client, LogLevel::Error, "Execution", &format!("Failed to execute current queue for pipeline graph: {}", pipeline_name)).await.unwrap();
+            
             return HttpResponse::InternalServerError().body("Failed to execute current queue");
         }
 
@@ -61,8 +67,11 @@ pub async fn exec(
     let result = executor.get_result();
     if result.is_err() {
         warn!("Failed to get execution result for pipeline graph: {}", pipeline_name);
+        create_log(&client, LogLevel::Error, "Execution", &format!("Failed to get execution result for pipeline graph: {}", pipeline_name)).await.unwrap();
+        
         return HttpResponse::InternalServerError().body("Failed to get execution result");
     }
 
+    create_log(&client, LogLevel::Info, "Execution", &format!("Execution completed for pipeline graph: {}", pipeline_name)).await.unwrap();
     HttpResponse::Ok().json(result.unwrap())
 }
