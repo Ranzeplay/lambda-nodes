@@ -55,7 +55,7 @@ where
         let client = self.client.clone();
         let method = req.method().to_string();
         let path = req.path().to_string();
-        let remote_ip = req.connection_info().host().to_string();
+        let remote_ip = req.connection_info().realip_remote_addr().unwrap_or("<unknown address>").to_string();
 
         let fut = self.service.call(req);
 
