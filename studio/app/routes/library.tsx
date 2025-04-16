@@ -55,8 +55,8 @@ export default function LibraryPage() {
 								<TableCell className="text-right">
 									{!node.isInternal && (
 										<div className="flex flex-row justify-end">
-											<Button variant="link">
-												<Link to={`/node/edit/${node.id}`} className="text-blue-500 hover:text-blue-700 !m-0 hover:border">
+											<Button variant="link" className="text-blue-500 hover:text-blue-700 !m-0 hover:border *:cursor-pointer" asChild>
+												<Link to={`/node/edit/${node.id}`}>
 													<TooltipProvider>
 														<Tooltip>
 															<TooltipTrigger><Pencil /></TooltipTrigger>

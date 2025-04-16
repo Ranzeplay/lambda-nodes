@@ -1,5 +1,5 @@
-import { Settings, LayoutDashboard, Code, Logs, CirclePlay } from "lucide-react";
-import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider } from "./ui/sidebar";
+import { Settings, LayoutDashboard, Code, Logs, CirclePlay, History } from "lucide-react";
+import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider } from "./ui/sidebar";
 
 const items = [
 	{
@@ -16,6 +16,11 @@ const items = [
 		title: "Pipelines",
 		url: "/pipelines",
 		icon: CirclePlay,
+	},
+	{
+		title: "History",
+		url: "/history",
+		icon: History,
 	},
 	{
 		title: "Logs",

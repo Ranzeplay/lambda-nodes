@@ -53,7 +53,7 @@ export default function PipelinesPage() {
 								</TableCell>
 								<TableCell className="text-right">
 									<div className="flex flex-row justify-end">
-										<Button variant="link" className="text-blue-500 hover:text-blue-700 !m-0 hover:border">
+										<Button variant="link" className="text-blue-500 hover:text-blue-700 !m-0 hover:border *:cursor-pointer" asChild>
 											<Link to={`/pipeline/edit/${pipeline.id}`}>
 												<TooltipProvider>
 													<Tooltip>
@@ -65,7 +65,7 @@ export default function PipelinesPage() {
 												</TooltipProvider>
 											</Link>
 										</Button>
-										<Button variant="link" className="text-blue-500 hover:text-blue-700 !m-0 hover:border">
+										<Button variant="link" className="text-blue-500 hover:text-blue-700 !m-0 hover:border *:cursor-pointer">
 											<TooltipProvider>
 												<Tooltip>
 													<TooltipTrigger><Binoculars /></TooltipTrigger>
@@ -75,7 +75,7 @@ export default function PipelinesPage() {
 												</Tooltip>
 											</TooltipProvider>
 										</Button>
-										<Button variant="link" className="text-blue-500 hover:text-blue-700 !m-0 hover:border">
+										<Button variant="link" className="text-blue-500 hover:text-blue-700 !m-0 hover:border *:cursor-pointer">
 											<TooltipProvider>
 												<Tooltip>
 													<TooltipTrigger><Rocket /></TooltipTrigger>
