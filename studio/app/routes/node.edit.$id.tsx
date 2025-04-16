@@ -14,7 +14,7 @@ const nodeTypes = { flowNode: FlowNode };
 
 export default function NodeEditPage({ params }: { params: any }) {
 	const [name, setName] = useState("");
-	const [script, setScript] = useState("export function handle(data, context) {\n\t// code here\n}\n");
+	const [script, setScript] = useState("function handle({ }) {\n\t// code here\n}\n");
 	const [inputs, setInputs] = useState<string[]>([]);
 	const [outputs, setOutputs] = useState<string[]>([]);
 

@@ -1,8 +1,13 @@
-import { Check, LoaderCircle, Wrench, X } from "lucide-react";
+import { Binoculars, Check, LoaderCircle, Wrench, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import FrameView from "~/components/frame";
+import { Button } from "~/components/ui/button";
+import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger } from "~/components/ui/drawer";
 import { TableHeader, TableRow, TableHead, TableBody, TableCell, Table } from "~/components/ui/table";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/components/ui/tooltip";
 import { serverAddress } from "~/lib/env";
+import { toast } from "sonner";
+import MonacoEditorWrapper from "~/components/monacoEditorWrapper";
 
 type History = {
 	id: string;
@@ -12,7 +17,7 @@ type History = {
 	endAt?: string;
 	error?: string;
 	result?: any;
-  }
+}
 
 export default function HistoryPage() {
 	const [histories, setHistories] = useState<History[]>([]);
@@ -27,18 +32,19 @@ export default function HistoryPage() {
 	return (
 		<FrameView title="History" subtitle="View history">
 			<Table>
-					<TableHeader>
-						<TableRow>
-							<TableHead className="font-bold w-[120px]">Id</TableHead>
-							<TableHead className="font-bold">Pipeline Id</TableHead>
-							<TableHead className="font-bold">Start time</TableHead>
-							<TableHead className="font-bold">End time</TableHead>
-							<TableHead className="font-bold">Duration</TableHead>
-							<TableHead className="font-bold">Status</TableHead>
-						</TableRow>
-					</TableHeader>
-					<TableBody>
-						{histories.map((history) => (
+				<TableHeader>
+					<TableRow>
+						<TableHead className="font-bold w-[120px]">Id</TableHead>
+						<TableHead className="font-bold">Pipeline Id</TableHead>
+						<TableHead className="font-bold">Start time</TableHead>
+						<TableHead className="font-bold">End time</TableHead>
+						<TableHead className="font-bold">Duration</TableHead>
+						<TableHead className="font-bold">Status</TableHead>
+						<TableHead className="font-bold text-right pr-6">Operations</TableHead>
+					</TableRow>
+				</TableHeader>
+				<TableBody>
+					{histories.map((history) => (
 							<TableRow>
 								<TableCell className="font-medium">{history.id}</TableCell>
 								<TableCell>{history.pipelineId}</TableCell>
@@ -51,10 +57,76 @@ export default function HistoryPage() {
 									{history.status === "failed" && <PipelineFailedState />}
 									{history.status === "preparing" && <PipelinePreparingState />}
 								</TableCell>
+								<TableCell className="text-right">
+									<Drawer direction="right">
+										<DrawerTrigger asChild>
+											<Button variant="link" className="text-blue-500 hover:text-blue-700 !m-0 hover:border">
+												<TooltipProvider>
+													<Tooltip>
+														<TooltipTrigger><Binoculars /></TooltipTrigger>
+														<TooltipContent>
+															<p>Inspect</p>
+														</TooltipContent>
+													</Tooltip>
+												</TooltipProvider>
+											</Button>
+										</DrawerTrigger>
+										<DrawerContent>
+											<DrawerHeader>
+												<DrawerTitle>Inspect pipeline history</DrawerTitle>
+												<DrawerDescription>{history.id}</DrawerDescription>
+											</DrawerHeader>
+
+											<div className="flex flex-col space-y-2 mx-4">
+												<hr className="border border-gray-300" />
+												<div className="flex flex-col space-y-1">
+													<h3 className="font-semibold">Duration</h3>
+													<p className="font-mono ml-2 text-gray-600">{history.endAt ? (new Date(history.endAt).getTime() - new Date(history.startAt).getTime()) + "ms" : "N/A"}</p>
+												</div>
+												<div className="flex flex-col space-y-1">
+													<h3 className="font-semibold">Error</h3>
+													<MonacoEditorWrapper 
+														value={history.error ?? "<unknown>"}
+														language="json"
+														options={{
+															readOnly: true,
+															minimap: { enabled: false },
+															scrollBeyondLastLine: false,
+															automaticLayout: true,
+														}}
+														height={"18vh"}
+														className="border border-gray-300"
+													/>
+												</div>
+												<div className="flex flex-col space-y-1">
+													<h3 className="font-semibold">Result</h3>
+													<MonacoEditorWrapper 
+														value={history.result ?? "<unknown>"}
+														language="json"
+														options={{
+															readOnly: true,
+															minimap: { enabled: false },
+															scrollBeyondLastLine: false,
+															automaticLayout: true,
+														}}
+														height={"18vh"}
+														className="border border-gray-300"
+													/>
+												</div>
+											</div>
+											<DrawerFooter className="flex flex-row-reverse">
+												<DrawerClose className="flex">
+													<Button variant="outline">Close</Button>
+												</DrawerClose>
+											</DrawerFooter>
+										</DrawerContent>
+									</Drawer>
+								</TableCell>
 							</TableRow>
-						))}
-					</TableBody>
-				</Table>
+						)
+					)}
+				</TableBody>
+			</Table>
 		</FrameView>
 	)
 }

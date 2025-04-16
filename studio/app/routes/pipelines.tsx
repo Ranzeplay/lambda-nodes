@@ -96,33 +96,6 @@ export default function PipelinesPage() {
 	);
 }
 
-const PipelineRunningState = () => {
-	return (
-		<div className="flex flex-row items-center text-blue-600 space-x-2">
-			<LoaderCircle className="animate-spin" />
-			<p>Running</p>
-		</div>
-	);
-}
-
-const PipelineSucceededState = () => {
-	return (
-		<div className="flex flex-row items-center text-green-600 space-x-2">
-			<Check />
-			<p>Succeeded</p>
-		</div>
-	);
-}
-
-const PipelineFailedState = () => {
-	return (
-		<div className="flex flex-row items-center text-red-600 space-x-2">
-			<Check />
-			<p>Failed</p>
-		</div>
-	);
-}
-
 const PipelineReadyState = () => {
 	return (
 		<div className="flex flex-row items-center text-gray-600 space-x-2">
