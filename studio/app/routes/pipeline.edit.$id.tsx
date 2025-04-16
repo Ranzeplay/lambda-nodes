@@ -4,7 +4,6 @@ import { useCallback, useEffect, useId, useState } from "react";
 import FrameView from "~/components/frame";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
-import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "~/components/ui/select";
 
 import '@xyflow/react/dist/style.css';
 import FlowNode from "~/components/node";
@@ -19,8 +18,6 @@ const nodeTypes = { flowNode: FlowNode };
 
 export default function PipelineEditPage({ params }: { params: any }) {
 	const [name, setName] = useState("");
-	const [method, setMethod] = useState("GET");
-	const [route, setRoute] = useState("");
 
 	const [nodes, setNodes, onNodesChange] = useNodesState([]);
 	const [edges, setEdges, onEdgesChange] = useEdgesState([]);
@@ -74,8 +71,6 @@ export default function PipelineEditPage({ params }: { params: any }) {
 			},
 			body: JSON.stringify({
 				name,
-				method,
-				url: route,
 				content: {
 					nodes,
 					edges
@@ -102,8 +97,6 @@ export default function PipelineEditPage({ params }: { params: any }) {
 			})
 			.then((data) => {
 				setName(data.name);
-				setMethod(data.method);
-				setRoute(data.url);
 				setNodes(data.content.nodes);
 				setEdges(data.content.edges);
 			})
@@ -152,31 +145,6 @@ export default function PipelineEditPage({ params }: { params: any }) {
 								</DrawerContent>
 							</Drawer>
 						</ReactFlow>
-					</div>
-				</div>
-
-				<div className="space-y-1.5">
-					<h2 className="font-bold text-xl">HTTP Route</h2>
-					<div className="flex flex-row space-x-4">
-						<Select value={method} onValueChange={(n) => setMethod(n)}>
-							<SelectTrigger className="w-[210px]">
-								<SelectValue placeholder="Select a HTTP method" />
-							</SelectTrigger>
-							<SelectContent>
-								<SelectGroup>
-									<SelectLabel>HTTP Methods</SelectLabel>
-									<SelectItem value="GET">GET</SelectItem>
-									<SelectItem value="POST">POST</SelectItem>
-									<SelectItem value="PUT">PUT</SelectItem>
-									<SelectItem value="DELETE">DELETE</SelectItem>
-									<SelectItem value="PATCH">PATCH</SelectItem>
-								</SelectGroup>
-							</SelectContent>
-						</Select>
-						<div className="flex flex-row space-x-1 items-center grow">
-							<p className="font-mono">/exec/</p>
-							<Input type="text" className="font-mono grow" value={route} onChange={(n) => setRoute(n.target.value)} />
-						</div>
 					</div>
 				</div>
 
