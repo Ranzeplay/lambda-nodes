@@ -61,72 +61,77 @@ export default function NewNodePage() {
 						setNode(newNode);
 					}} />
 				</div>
-				<div className="space-y-1.5">
-					<h2 className="font-bold text-xl">Script</h2>
-					<MonacoEditorWrapper height={"56vh"} language="javascript" className="border border-gray-300" value={script} onChange={n => setScript(n ?? "")} />
-				</div>
+
 				<div className="space-y-1.5">
 					<h2 className="font-bold text-xl">Configuration</h2>
 					<div className="flex flex-row space-x-4">
 						<div className="h-[56vh] border border-gray-300 grow">
 							<ReactFlowWrapper nodes={[node]} nodeTypes={nodeTypes} nodesConnectable={false} fitView />
 						</div>
-						<div className="flex flex-col space-y-2 w-96">
-							<div className="flex flex-col space-y-1.5">
-								<h3 className="text-lg font-bold">Input</h3>
-								{inputs.map((i, index) => (
-									<div className="flex flex-row space-x-4" key={index}>
-										<Input type="text" className="grow" value={i} onChange={(n) => {
-											const newInput = [...inputs];
-											newInput[index] = n.target.value;
-											setInputs(newInput);
+						<div className="flex flex-col space-y-4">
+							<div className="flex flex-col space-y-2 w-96 grow">
+								<div className="flex flex-col space-y-1.5">
+									<h3 className="text-lg font-bold">Input</h3>
+									{inputs.map((i, index) => (
+										<div className="flex flex-row space-x-4" key={index}>
+											<Input type="text" className="grow" value={i} onChange={(n) => {
+												const newInput = [...inputs];
+												newInput[index] = n.target.value;
+												setInputs(newInput);
 
-											const newNode = { ...node };
-											newNode.data.inputs = newInput;
-											setNode(newNode);
-										}} />
-										<Button variant={"link"} className="block w-min cursor-pointer text-red-500" onClick={() => {
-											const newInput = [...inputs];
-											newInput.splice(index, 1);
-											setInputs(newInput);
+												const newNode = { ...node };
+												newNode.data.inputs = newInput;
+												setNode(newNode);
+											}} />
+											<Button variant={"link"} className="block w-min cursor-pointer text-red-500" onClick={() => {
+												const newInput = [...inputs];
+												newInput.splice(index, 1);
+												setInputs(newInput);
 
-											const newNode = { ...node };
-											newNode.data.inputs = newInput;
-											setNode(newNode);
-										}}>Remove</Button>
-									</div>
-								))}
-								<Button variant={"link"} className="block w-min cursor-pointer !text-blue-500" onClick={() => setInputs([...inputs, ""])}>Add</Button>
+												const newNode = { ...node };
+												newNode.data.inputs = newInput;
+												setNode(newNode);
+											}}>Remove</Button>
+										</div>
+									))}
+									<Button variant={"link"} className="block w-min cursor-pointer !text-blue-500" onClick={() => setInputs([...inputs, ""])}>Add</Button>
+								</div>
+								<div className="flex flex-col space-y-1.5">
+									<h3 className="text-lg font-bold">Output</h3>
+									{outputs.map((i, index) => (
+										<div className="flex flex-row space-x-2" key={index}>
+											<Input type="text" className="w-4/5" value={i} onChange={(n) => {
+												const newOutput = [...outputs];
+												newOutput[index] = n.target.value;
+												setOutputs(newOutput);
+
+												const newNode = { ...node };
+												newNode.data.outputs = newOutput;
+												setNode(newNode);
+											}} />
+											<Button variant={"link"} className="block w-min cursor-pointer text-red-500" onClick={() => {
+												const newOutput = [...outputs];
+												newOutput.splice(index, 1);
+												setOutputs(newOutput);
+
+												const newNode = { ...node };
+												newNode.data.outputs = newOutput;
+												setNode(newNode);
+											}}>Remove</Button>
+										</div>
+									))}
+									<Button variant={"link"} className="block w-min cursor-pointer !text-blue-500" onClick={() => setOutputs([...outputs, ""])}>Add</Button>
+								</div>
 							</div>
-							<div className="flex flex-col space-y-1.5">
-								<h3 className="text-lg font-bold">Output</h3>
-								{outputs.map((i, index) => (
-									<div className="flex flex-row space-x-2" key={index}>
-										<Input type="text" className="w-4/5" value={i} onChange={(n) => {
-											const newOutput = [...outputs];
-											newOutput[index] = n.target.value;
-											setOutputs(newOutput);
-
-											const newNode = { ...node };
-											newNode.data.outputs = newOutput;
-											setNode(newNode);
-										}} />
-										<Button variant={"link"} className="block w-min cursor-pointer text-red-500" onClick={() => {
-											const newOutput = [...outputs];
-											newOutput.splice(index, 1);
-											setOutputs(newOutput);
-
-											const newNode = { ...node };
-											newNode.data.outputs = newOutput;
-											setNode(newNode);
-										}}>Remove</Button>
-									</div>
-								))}
-								<Button variant={"link"} className="block w-min cursor-pointer !text-blue-500" onClick={() => setOutputs([...outputs, ""])}>Add</Button>
+							<div className="block">
+								<Button variant={"destructive"} onClick={() => setScript(generateScript(inputs, outputs))}>Reset script with template</Button>
 							</div>
 						</div>
 					</div>
-
+					<div className="space-y-1.5">
+						<h2 className="font-bold text-xl">Script</h2>
+						<MonacoEditorWrapper height={"56vh"} language="javascript" className="border border-gray-300" value={script} onChange={n => setScript(n ?? "")} />
+					</div>
 				</div>
 				<div className="flex flex-row space-x-4">
 					<Button onClick={submit}>Submit</Button>
@@ -135,4 +140,12 @@ export default function NewNodePage() {
 			</div>
 		</FrameView>
 	)
+}
+
+function generateScript(inputs: string[], outputs: string[]) {
+	let text = "function handle({ %inputs% }) {\n\t// code here\n\n\tlet result = {\n\t\t%outputs%\n\t};\n\treturn result;\n}\n";
+	text = text.replace("%inputs%", inputs.map(i => i).join(", "));
+	text = text.replace("%outputs%", outputs.map(i => `${i}: {}`).join(",\n\t\t"));
+
+	return text;
 }
