@@ -9,7 +9,7 @@ COPY src/ src/
 RUN cargo build --release
 
 # Create a minimal runtime image
-FROM rust:1.86-slim AS runner
+FROM debian:bookworm-slim AS runner
 WORKDIR /app
 
 # Copy the built binary from the builder stage
