@@ -4,6 +4,7 @@ export type NodeData = {
   name: string;
   inputs: string[];
   outputs: string[];
+  script?: string;
   status: "idle" | "running" | "error" | "success";
 };
 

@@ -6,7 +6,6 @@ import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, Dr
 import { TableHeader, TableRow, TableHead, TableBody, TableCell, Table } from "~/components/ui/table";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/components/ui/tooltip";
 import { serverAddress } from "~/lib/env";
-import { toast } from "sonner";
 import MonacoEditorWrapper from "~/components/monacoEditorWrapper";
 
 type History = {
@@ -60,7 +59,7 @@ export default function HistoryPage() {
 								<TableCell className="text-right">
 									<Drawer direction="right">
 										<DrawerTrigger asChild>
-											<Button variant="link" className="text-blue-500 hover:text-blue-700 !m-0 hover:border">
+											<Button variant="link" className="text-blue-500 hover:text-blue-700 !m-0 hover:border *:cursor-pointer">
 												<TooltipProvider>
 													<Tooltip>
 														<TooltipTrigger><Binoculars /></TooltipTrigger>
