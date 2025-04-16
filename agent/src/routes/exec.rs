@@ -1,6 +1,6 @@
 use crate::db::flow::Graph;
 use crate::db::history::{create_history, fail_history, success_history, update_history_status};
-use crate::db::{create_log, LogLevel};
+use crate::db::{create_log, get_pipeline, LogLevel};
 use crate::executor::GraphExecutor;
 use actix_web::{route, web, HttpRequest, HttpResponse, Responder};
 use log::{info, warn};
@@ -8,6 +8,7 @@ use serde_json::Value;
 use std::sync::Arc;
 use tokio_postgres::Client;
 use uuid::Uuid;
+use crate::db::routes::find_route;
 
 #[route(
     "/exec/{tail:.*}",
@@ -25,21 +26,20 @@ pub async fn exec(
 ) -> impl Responder {
     let tail = path.into_inner();
 
-    let pipeline_result = client
-        .query_one(
-            "SELECT name, content, id FROM pipelines WHERE url = $1 AND method = $2 LIMIT 1",
-            &[&tail, &req.method().as_str()],
-        )
-        .await;
+    let route_result = find_route(&client, tail, req.method().to_string()).await;
 
+    if let Err(e) = route_result {
+        return HttpResponse::NotFound().body(format!("{:?}", e));
+    }
+    let pipeline_id: Uuid = route_result.unwrap().pipeline_id;
+    let pipeline_result = get_pipeline(&client, pipeline_id).await;
     if let Err(e) = pipeline_result {
         return HttpResponse::NotFound().body(format!("{:?}", e));
     }
+    let pipeline_result = pipeline_result.unwrap().unwrap();
     
-    let pipeline_graph_result = pipeline_result.unwrap();
-    let pipeline_name: String = pipeline_graph_result.get(0);
-    let pipeline_graph_item = pipeline_graph_result.get(1);
-    let pipeline_id: Uuid = pipeline_graph_result.get(2);
+    let pipeline_name: String = pipeline_result.name;
+    let pipeline_graph_item = pipeline_result.content;
     let pipeline_graph: Graph = serde_json::from_value(pipeline_graph_item).unwrap();
     
     let history = create_history(&client, pipeline_id, "preparing").await;

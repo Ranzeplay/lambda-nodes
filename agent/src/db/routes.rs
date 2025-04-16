@@ -87,3 +87,13 @@ pub async fn update_route(client: &Client, id: Uuid, path: &str, method: &str) -
         .await?;
     Ok(row_to_route(row))
 }
+
+pub async fn find_route(client: &Client, path: String, method: String) -> Result<Route> {
+    let row = client
+        .query_one(
+            "SELECT id, pipeline_id, path, method FROM routes WHERE path = $1 AND method = $2",
+            &[&path, &method],
+        )
+        .await?;
+    Ok(row_to_route(row))
+}
