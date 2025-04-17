@@ -35,12 +35,16 @@ The following environment variables are required to run the Agent:
 
 ## Running the Agent
 
-1. Start the backend server:
+1. Initialize and seed the database
+
+Execute `sql/schema.sql` and `sql/seed.sql` in your PostgreSQL database to setup database.
+
+2. Start the backend server:
    ```bash
    cargo run
    ```
 
-2. The backend will be available at `http://localhost:3000`.
+3. The backend will be available at `http://localhost:3000`.
 
 ## Building for Production
 
