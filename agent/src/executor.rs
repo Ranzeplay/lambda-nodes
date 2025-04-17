@@ -36,6 +36,9 @@ impl GraphExecutor {
     pub async fn new(graph: Graph, client: &Client) -> Result<Self, AnyError> {
         let runtime = JsRuntime::new(RuntimeOptions {
             module_loader: Some(Rc::new(deno_core::FsModuleLoader)),
+            extensions: vec![
+                deno_fetch::deno_fetch::init_ops_and_esm::<deno_permissions::PermissionsContainer>(deno_fetch::Options::default())
+            ],
             ..Default::default()
         });
         let data_cache = HashMap::new();

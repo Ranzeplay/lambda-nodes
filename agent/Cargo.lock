@@ -232,6 +232,7 @@ dependencies = [
  "cron_tab",
  "deno_core",
  "deno_fetch",
+ "deno_permissions",
  "deno_web",
  "dotenvy",
  "env_logger",
